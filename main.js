@@ -1217,23 +1217,14 @@ function initProductFilters() {
 
   if (!btns.length || !cards.length || !grid) return;
 
-  function enforceTwoColumns() {
-    grid.classList.add('grid-2-cols');
-    grid.classList.remove('grid-4-cols', 'grid-3-cols');
-    grid.style.setProperty('display', 'grid', 'important');
-    grid.style.setProperty('grid-template-columns', 'repeat(2, 1fr)', 'important');
-  }
-
-  // Always enforce standard 2-column exhibition representation across all filters
-  enforceTwoColumns();
+  grid.classList.add('grid-2-cols');
+  grid.classList.remove('grid-4-cols', 'grid-3-cols');
+  grid.style.removeProperty('grid-template-columns');
 
   // Filter button interaction
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.getAttribute('data-filter');
-
-      // Re-assert 2-column layout on every filter interaction
-      enforceTwoColumns();
 
       // Update button active state
       btns.forEach(b => {
