@@ -1211,11 +1211,9 @@ function initPartnersCarousel() {
    5. Product Category Filter & Dual-Column Gallery Representation
    ================================================================ */
 function initProductFilters() {
-  const btns        = document.querySelectorAll('.filter-btn');
-  const cards       = document.querySelectorAll('.product-card');
-  const grid        = document.getElementById('product-grid');
-  const liveCountEl = document.getElementById('collection-live-count');
-  const bannerEl    = document.getElementById('category-context-banner');
+  const btns  = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.product-card');
+  const grid  = document.getElementById('product-grid');
 
   if (!btns.length || !cards.length || !grid) return;
 
@@ -1228,19 +1226,6 @@ function initProductFilters() {
 
   // Always enforce standard 2-column exhibition representation across all filters
   enforceTwoColumns();
-
-  function updateCollectionStatus(filter, count) {
-    if (!liveCountEl) return;
-    if (filter === 'all') {
-      liveCountEl.textContent = `Displaying ${count} Masterpieces · Dual-Column View`;
-    } else if (filter === 'internal-door') {
-      liveCountEl.textContent = `Displaying ${count} Internal Doors · Dual-Column View`;
-    } else if (filter === 'main-entrance-door') {
-      liveCountEl.textContent = `Displaying ${count} Main Entrance Portals · Dual-Column View`;
-    } else {
-      liveCountEl.textContent = `Displaying ${count} Curated Pieces · Dual-Column View`;
-    }
-  }
 
   // Filter button interaction
   btns.forEach(btn => {
@@ -1258,15 +1243,7 @@ function initProductFilters() {
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
 
-      // Internal Doors Curation Context Banner
-      if (filter === 'internal-door') {
-        if (bannerEl) bannerEl.style.display = 'block';
-      } else {
-        if (bannerEl) bannerEl.style.display = 'none';
-      }
-
       // Filter cards instantly without lag, flash, or offscreen blanking
-      let visibleCount = 0;
       cards.forEach(card => {
         const match = filter === 'all' || card.dataset.category === filter;
         if (match) {
@@ -1281,14 +1258,11 @@ function initProductFilters() {
           if (img && img.loading === 'lazy' && !img.complete) {
             img.loading = 'eager';
           }
-          visibleCount++;
         } else {
           card.classList.add('is-hidden');
           card.style.display = 'none';
         }
       });
-
-      updateCollectionStatus(filter, visibleCount);
     });
   });
 

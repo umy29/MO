@@ -168,44 +168,21 @@
         <div class="section-divider" aria-hidden="true"></div>
       </div>
 
-      <!-- Collection Controls Bar: Category Filters & Dual-Column Live Status -->
-      <div class="collection-controls-bar reveal">
-        <div class="filters" role="tablist" aria-label="Product categories">
-          <button class="filter-btn active" id="filter-all" role="tab" aria-selected="true" data-filter="all">
-            <span class="filter-label">All Portals</span>
-            <span class="filter-count" aria-label="28 doors">28</span>
-          </button>
-          <button class="filter-btn" id="filter-main-entrance" role="tab" aria-selected="false" data-filter="main-entrance-door">
-            <span class="filter-label">Main Entrance</span>
-            <span class="filter-count" aria-label="12 doors">12</span>
-          </button>
-          <button class="filter-btn" id="filter-internal" role="tab" aria-selected="false" data-filter="internal-door">
-            <span class="filter-label">Internal Doors</span>
-            <span class="filter-count" aria-label="16 doors">16</span>
-          </button>
-        </div>
-
-        <div class="collection-view-controls">
-          <span class="collection-live-count" id="collection-live-count">Displaying 28 Masterpieces &middot; Dual-Column View</span>
-          <div class="grid-mode-badge" aria-label="Two column exhibition mode">
-            <svg class="grid-icon" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <rect x="1" y="1" width="6" height="14" rx="0.5"/>
-              <rect x="9" y="1" width="6" height="14" rx="0.5"/>
-            </svg>
-            <span>2 Columns</span>
-          </div>
-        </div>
+      <!-- Category Filters -->
+      <div class="filters reveal" role="tablist" aria-label="Product categories">
+        <button class="filter-btn active" id="filter-all" role="tab" aria-selected="true" data-filter="all">
+          <span class="filter-label">All</span>
+          <span class="filter-count" aria-label="28 doors">28</span>
+        </button>
+        <button class="filter-btn" id="filter-main-entrance" role="tab" aria-selected="false" data-filter="main-entrance-door">
+          <span class="filter-label">Main Entrance Door</span>
+          <span class="filter-count" aria-label="12 doors">12</span>
+        </button>
+        <button class="filter-btn" id="filter-internal" role="tab" aria-selected="false" data-filter="internal-door">
+          <span class="filter-label">Internal Doors</span>
+          <span class="filter-count" aria-label="16 doors">16</span>
+        </button>
       </div>
-
-      <!-- Internal Doors Dedicated Curation Banner -->
-      <aside class="category-context-banner" id="category-context-banner" aria-live="polite" style="display: none;">
-        <div class="context-banner-inner">
-          <span class="context-pill">WPC Interior Atelier</span>
-          <p class="context-desc">
-            100% Waterproof &amp; Moisture-Proof &middot; Acoustic Core Insulation (Rw 38&ndash;42 dB) &middot; Standard 220 &times; 85 cm &amp; Custom Sizing &middot; 16 Architectural Masterpieces
-          </p>
-        </div>
-      </aside>
 
       <!-- Product Grid (Two-Column Exhibition Layout for All Displays) -->
       <div class="product-grid grid-2-cols" id="product-grid" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important;" role="list">

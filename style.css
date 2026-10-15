@@ -777,22 +777,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 /* Collection Controls Bar (Filters + Desktop Grid Switcher) */
-.collection-controls-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  margin-bottom: clamp(1.25rem, 2.2vw, 1.85rem);
-  border-bottom: 1px solid var(--color-border);
-  position: relative;
-}
-
 /* Filters */
 .filters {
   display: flex;
   align-items: center;
-  margin-bottom: 0;
-  border-bottom: none;
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+  border-bottom: 1px solid var(--color-border);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -847,85 +837,6 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background: rgba(197, 160, 89, 0.2);
   color: #8A6E2F;
   font-weight: 700;
-}
-
-/* Dual-Column Layout Badge & Live Count */
-.collection-view-controls {
-  display: none;
-  align-items: center;
-  gap: 1.25rem;
-  flex-shrink: 0;
-  padding-bottom: 0.4rem;
-}
-@media (min-width: 900px) {
-  .collection-view-controls { display: flex; }
-}
-.collection-live-count {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-warm-gray);
-  font-weight: 400;
-}
-.grid-mode-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.35rem 0.75rem;
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-dark);
-  background: rgba(197, 160, 89, 0.14);
-  border: 1px solid rgba(197, 160, 89, 0.28);
-  border-radius: 9999px;
-}
-.grid-mode-badge .grid-icon {
-  display: block;
-  color: var(--color-gold);
-}
-
-/* Internal Doors Dedicated Context Banner */
-.category-context-banner {
-  margin-bottom: 1.75rem;
-  padding: 0.85rem 1.25rem;
-  background: rgba(247, 245, 240, 0.9);
-  border: 1px solid rgba(197, 160, 89, 0.25);
-  border-left: 3px solid var(--color-gold);
-  border-radius: 4px;
-  animation: bannerFadeIn 0.35s var(--ease-luxury) forwards;
-}
-.context-banner-inner {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-}
-.context-pill {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #8A6E2F;
-  background: rgba(197, 160, 89, 0.15);
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-}
-.context-desc {
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  color: var(--color-charcoal);
-  margin: 0;
-  letter-spacing: 0.02em;
-  line-height: 1.45;
-}
-@keyframes bannerFadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Product Grid — Two-Column Architectural Exhibition Gallery (All Displays) */
@@ -4365,13 +4276,6 @@ body.is-fullscreen #stage-craft-banner {
     color: var(--color-gold-light);
     border-color: var(--color-dark);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  }
-  .collection-controls-bar {
-    flex-direction: column;
-    align-items: stretch;
-    border-bottom: none;
-    gap: 0.75rem;
-  }
   .product-grid,
   .product-grid.grid-2-cols {
     grid-template-columns: repeat(2, 1fr) !important;
