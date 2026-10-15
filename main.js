@@ -1415,8 +1415,40 @@ function initProductShowcaseModal() {
   let isMouseOverStage = false;
   let currentViewMode = 'primary'; // 'primary', 'loupe'
 
+  const isMobileView = () => window.matchMedia('(max-width: 768px)').matches || window.innerWidth <= 768;
+
   /* --- High-Detail Product Zoom & Pan System --- */
   function setZoom(level, panX, panY) {
+    // Zoom and pan functionality does NOT exist on mobile phone view
+    if (isMobileView()) {
+      targetZoom = 1.0;
+      targetPanX = 0;
+      targetPanY = 0;
+      currentZoom = 1.0;
+      currentPanX = 0;
+      currentPanY = 0;
+      if (product3dWrap) {
+        product3dWrap.classList.remove('is-zoomed');
+        product3dWrap.style.transform = '';
+      }
+      if (zoomHud) {
+        zoomHud.classList.remove('is-visible');
+      }
+      if (zoomIndicator) {
+        zoomIndicator.textContent = '100%';
+      }
+      if (btnInspectDetail) {
+        btnInspectDetail.classList.remove('is-active');
+        if (inspectBtnLabel) inspectBtnLabel.innerHTML = 'Inspect Detail (2&times;)';
+      }
+      if (btnDockZoom) {
+        btnDockZoom.classList.remove('active');
+        if (dockZoomLabel) dockZoomLabel.innerHTML = 'Detail Zoom (2&times;)';
+      }
+      requestTiltUpdate();
+      return;
+    }
+
     const clamped = Math.min(Math.max(level, 1.0), 3.0);
     targetZoom = clamped;
     if (typeof panX === 'number') targetPanX = panX;
@@ -1556,6 +1588,7 @@ function initProductShowcaseModal() {
 
   /* --- Interactive Stage Mouse & Drag Controls --- */
   stage.addEventListener('mousedown', (e) => {
+    if (isMobileView()) return;
     if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
     isDragging = true;
     dragStartX = e.clientX;
@@ -1571,6 +1604,7 @@ function initProductShowcaseModal() {
   });
 
   stage.addEventListener('mousemove', (e) => {
+    if (isMobileView()) return;
     isMouseOverStage = true;
     const rect = stage.getBoundingClientRect();
 
@@ -1615,6 +1649,7 @@ function initProductShowcaseModal() {
 
   // Mouse wheel zoom on stage
   stage.addEventListener('wheel', (e) => {
+    if (isMobileView()) return;
     e.preventDefault();
     const zoomStep = e.deltaY < 0 ? 0.25 : -0.25;
     setZoom(targetZoom + zoomStep);
@@ -1622,6 +1657,7 @@ function initProductShowcaseModal() {
 
   // Double click to toggle inspection zoom at clicked point
   stage.addEventListener('dblclick', (e) => {
+    if (isMobileView()) return;
     if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
     if (targetZoom > 1.2) {
       setZoom(1.0);
@@ -1638,16 +1674,19 @@ function initProductShowcaseModal() {
   // Toolbar zoom buttons
   btnZoomIn?.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (isMobileView()) return;
     setZoom(targetZoom + 0.35);
   });
   btnZoomOut?.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (isMobileView()) return;
     setZoom(targetZoom - 0.35);
   });
 
   // Detail Inspection toggle buttons
   btnInspectDetail?.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (isMobileView()) return;
     if (targetZoom > 1.2) {
       setZoom(1.0);
     } else {
@@ -1658,6 +1697,7 @@ function initProductShowcaseModal() {
   if (btnDockZoom && btnDockZoom !== btnInspectDetail) {
     btnDockZoom.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (isMobileView()) return;
       if (targetZoom > 1.2) {
         setZoom(1.0);
       } else {
@@ -1668,6 +1708,7 @@ function initProductShowcaseModal() {
 
   btnHudResetZoom?.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (isMobileView()) return;
     setZoom(1.0);
   });
 
@@ -1715,9 +1756,11 @@ function initProductShowcaseModal() {
         if (!wasActive) {
           pin.classList.add('is-active');
 
-          const panX = (0.5 - hs.x / 100) * 220;
-          const panY = (0.5 - hs.y / 100) * 220;
-          setZoom(2.0, panX, panY);
+          if (!isMobileView()) {
+            const panX = (0.5 - hs.x / 100) * 220;
+            const panY = (0.5 - hs.y / 100) * 220;
+            setZoom(2.0, panX, panY);
+          }
 
           if (craftBanner && craftTitle && craftDesc && craftBadge) {
             craftBadge.textContent = badgeText;
@@ -1738,7 +1781,9 @@ function initProductShowcaseModal() {
             }
           }
         } else {
-          setZoom(1.0);
+          if (!isMobileView()) {
+            setZoom(1.0);
+          }
           craftBanner?.classList.remove('is-visible');
         }
       });
@@ -1759,7 +1804,9 @@ function initProductShowcaseModal() {
     e.stopPropagation();
     craftBanner?.classList.remove('is-visible');
     document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('is-active'));
-    setZoom(1.0);
+    if (!isMobileView()) {
+      setZoom(1.0);
+    }
   });
 
   /* --- Render Material Swatches --- */
@@ -2108,7 +2155,13 @@ function initProductShowcaseModal() {
         panStartX = targetPanX;
         panStartY = targetPanY;
 
-        // Double tap detection for quick mobile zoom toggle
+        // On mobile view: double-tap zoom and touch panning are completely disabled
+        if (isMobileView()) {
+          isTouchPanning = false;
+          return;
+        }
+
+        // Double tap detection for quick mobile zoom toggle (desktop touchscreens only)
         if (now - touchLastTapTime < 320) {
           if (targetZoom > 1.2) {
             setZoom(1.0);
@@ -2125,6 +2178,8 @@ function initProductShowcaseModal() {
         }
       } else if (e.touches.length === 2) {
         isTouchPanning = false;
+        // On mobile view: pinch-to-zoom is completely disabled
+        if (isMobileView()) return;
         const t1 = e.touches[0];
         const t2 = e.touches[1];
         touchInitialDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
@@ -2134,6 +2189,9 @@ function initProductShowcaseModal() {
 
     stage.addEventListener('touchmove', (e) => {
       if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
+
+      // On mobile view: zoom and touch pan functionality does not exist
+      if (isMobileView()) return;
 
       if (e.touches.length === 1 && isTouchPanning && targetZoom > 1.05) {
         const dx = e.touches[0].clientX - dragStartX;
@@ -2157,7 +2215,8 @@ function initProductShowcaseModal() {
         return;
       }
 
-      if (e.changedTouches.length === 1 && targetZoom <= 1.05) {
+      // On mobile view (and when not zoomed on desktop), horizontal swipe navigates between doors smoothly
+      if (e.changedTouches.length === 1 && (isMobileView() || targetZoom <= 1.05)) {
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
         const deltaX = touchEndX - touchStartX;
@@ -2176,6 +2235,13 @@ function initProductShowcaseModal() {
         }
       }
     }, { passive: true });
+
+    // Handle viewport resize: lock zoom and pan to default on mobile
+    window.addEventListener('resize', () => {
+      if (isMobileView() && (targetZoom !== 1.0 || currentZoom !== 1.0 || targetPanX !== 0 || targetPanY !== 0)) {
+        setZoom(1.0, 0, 0);
+      }
+    });
   }
 
   /* --- Product Card Clicks in Gallery --- */
