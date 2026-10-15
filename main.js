@@ -1444,31 +1444,63 @@ function initProductShowcaseModal() {
         dockZoomLabel.innerHTML = isZoomed ? 'Reset Zoom (1&times;)' : 'Detail Zoom (2&times;)';
       }
     }
+
+    requestTiltUpdate();
   }
 
-  /* --- Interactive 3D Parallax Tilt & Floor Shadow Loop --- */
+  /* --- Interactive 3D Parallax Tilt & Floor Shadow Loop (On-Demand Frame-Synced) --- */
+  let tiltRafId = null;
+
+  function requestTiltUpdate() {
+    if (!modal || !modal.classList.contains('is-open')) return;
+    if (!tiltRafId) {
+      tiltRafId = requestAnimationFrame(animateTilt);
+    }
+  }
+
   function animateTilt() {
-    currentTiltX += (targetTiltX - currentTiltX) * 0.12;
-    currentTiltY += (targetTiltY - currentTiltY) * 0.12;
-    currentZoom  += (targetZoom  - currentZoom)  * 0.10;
-    currentPanX  += (targetPanX  - currentPanX)  * 0.12;
-    currentPanY  += (targetPanY  - currentPanY)  * 0.12;
-
-    if (product3dWrap) {
-      product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(2)}px, ${currentPanY.toFixed(2)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg)`;
+    if (!modal || !modal.classList.contains('is-open')) {
+      tiltRafId = null;
+      return;
     }
 
-    // Dynamic Studio Floor Contact Shadow reacting to perspective shift
-    if (floorShadow) {
-      const shadowShiftX = (-currentTiltY * 1.5).toFixed(1);
-      const shadowShiftY = (currentTiltX * 0.85).toFixed(1);
-      const shadowScale = (1 + (currentZoom - 1) * 0.35).toFixed(2);
-      floorShadow.style.transform = `translateX(-50%) translate3d(${shadowShiftX}px, ${shadowShiftY}px, 0) scale(${shadowScale})`;
-    }
+    const diffTiltX = Math.abs(targetTiltX - currentTiltX);
+    const diffTiltY = Math.abs(targetTiltY - currentTiltY);
+    const diffZoom  = Math.abs(targetZoom  - currentZoom);
+    const diffPanX  = Math.abs(targetPanX  - currentPanX);
+    const diffPanY  = Math.abs(targetPanY  - currentPanY);
 
-    requestAnimationFrame(animateTilt);
+    if (diffTiltX > 0.01 || diffTiltY > 0.01 || diffZoom > 0.001 || diffPanX > 0.05 || diffPanY > 0.05) {
+      currentTiltX += (targetTiltX - currentTiltX) * 0.16;
+      currentTiltY += (targetTiltY - currentTiltY) * 0.16;
+      currentZoom  += (targetZoom  - currentZoom)  * 0.14;
+      currentPanX  += (targetPanX  - currentPanX)  * 0.16;
+      currentPanY  += (targetPanY  - currentPanY)  * 0.16;
+
+      if (product3dWrap) {
+        product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(1)}px, ${currentPanY.toFixed(1)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+      }
+
+      if (floorShadow) {
+        const shadowShiftX = (-currentTiltY * 1.5).toFixed(1);
+        const shadowShiftY = (currentTiltX * 0.85).toFixed(1);
+        const shadowScale = (1 + (currentZoom - 1) * 0.35).toFixed(2);
+        floorShadow.style.transform = `translateX(-50%) translate3d(${shadowShiftX}px, ${shadowShiftY}px, 0) scale(${shadowScale})`;
+      }
+
+      tiltRafId = requestAnimationFrame(animateTilt);
+    } else {
+      currentTiltX = targetTiltX;
+      currentTiltY = targetTiltY;
+      currentZoom  = targetZoom;
+      currentPanX  = targetPanX;
+      currentPanY  = targetPanY;
+      if (product3dWrap) {
+        product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(1)}px, ${currentPanY.toFixed(1)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+      }
+      tiltRafId = null;
+    }
   }
-  animateTilt();
 
   /* --- High-Precision Optical Loupe Lens --- */
   function updateLoupeLens(e, stageRect) {
@@ -1536,6 +1568,7 @@ function initProductShowcaseModal() {
       const maxPan = 240 * (targetZoom - 0.7);
       targetPanX = Math.min(Math.max(panStartX + dx, -maxPan), maxPan);
       targetPanY = Math.min(Math.max(panStartY + dy, -maxPan), maxPan);
+      requestTiltUpdate();
       return;
     }
 
@@ -1547,6 +1580,7 @@ function initProductShowcaseModal() {
 
     targetTiltX = -normY * (targetZoom > 1.2 ? 5 : 12);
     targetTiltY = normX * (targetZoom > 1.2 ? 6 : 14);
+    requestTiltUpdate();
 
     if (sheen) {
       sheen.style.background = `radial-gradient(circle at ${(relX * 100).toFixed(1)}% ${(relY * 100).toFixed(1)}%, rgba(255, 255, 255, 0.42) 0%, transparent 60%)`;
@@ -1562,6 +1596,7 @@ function initProductShowcaseModal() {
     if (targetZoom <= 1.05) {
       targetTiltX = 0;
       targetTiltY = 0;
+      requestTiltUpdate();
     }
     if (loupeLens) loupeLens.style.opacity = '0';
   });
@@ -1966,6 +2001,7 @@ function initProductShowcaseModal() {
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-locked');
+    requestTiltUpdate();
 
     // Accessibility focus
     closeBtn?.focus();
@@ -1987,6 +2023,10 @@ function initProductShowcaseModal() {
     btnToggleDims?.classList.remove('active');
     craftBanner?.classList.remove('is-visible');
     setZoom(1.0);
+    if (tiltRafId) {
+      cancelAnimationFrame(tiltRafId);
+      tiltRafId = null;
+    }
   }
 
   /* --- Next / Previous Navigation --- */
@@ -2076,6 +2116,7 @@ function initProductShowcaseModal() {
         const maxPan = 240 * (targetZoom - 0.7);
         targetPanX = Math.min(Math.max(panStartX + dx, -maxPan), maxPan);
         targetPanY = Math.min(Math.max(panStartY + dy, -maxPan), maxPan);
+        requestTiltUpdate();
       } else if (e.touches.length === 2 && touchInitialDist > 10) {
         const t1 = e.touches[0];
         const t2 = e.touches[1];
@@ -2291,44 +2332,57 @@ function initNewsletterForm() {
 
 
 /* ================================================================
-   9. Cursor Spotlight
+   9. Cursor Spotlight (Performance Optimized)
    ================================================================ */
 function initCursorSpotlight() {
   const spotlight = document.getElementById('cursor-spotlight');
   if (!spotlight) return;
 
-  if (window.matchMedia('(pointer: coarse)').matches) {
+  // Do not run on touch screens or mobile
+  if (window.matchMedia('(pointer: coarse), (hover: none)').matches) {
     spotlight.style.display = 'none';
     return;
   }
 
   let mouseX = -1000, mouseY = -1000;
   let currX   = -1000, currY = -1000;
+  let isMoving = false;
+  let rafId = null;
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function updateSpotlight() {
+    currX = lerp(currX, mouseX, 0.14);
+    currY = lerp(currY, mouseY, 0.14);
+    spotlight.style.transform = `translate3d(${Math.round(currX)}px, ${Math.round(currY)}px, 0) translate(-50%, -50%)`;
+
+    if (Math.abs(currX - mouseX) > 0.5 || Math.abs(currY - mouseY) > 0.5) {
+      rafId = requestAnimationFrame(updateSpotlight);
+    } else {
+      rafId = null;
+      isMoving = false;
+    }
+  }
 
   document.addEventListener('mousemove', e => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+    if (!isMoving) {
+      isMoving = true;
+      if (!rafId) {
+        rafId = requestAnimationFrame(updateSpotlight);
+      }
+    }
   }, { passive: true });
-
-  function lerp(a, b, t) { return a + (b - a) * t; }
-
-  function animate() {
-    currX = lerp(currX, mouseX, 0.10);
-    currY = lerp(currY, mouseY, 0.10);
-    spotlight.style.left = currX + 'px';
-    spotlight.style.top  = currY + 'px';
-    requestAnimationFrame(animate);
-  }
-  animate();
 
   const hoverEls = document.querySelectorAll(
     '.product-card-link, .btn-primary, .btn-outline, .nav-link, .filter-btn, .nav-inquire-pill'
   );
   hoverEls.forEach(el => {
     el.addEventListener('mouseenter', () => {
-      spotlight.style.width  = '600px';
-      spotlight.style.height = '600px';
-      spotlight.style.transition = 'width 0.4s ease, height 0.4s ease';
+      spotlight.style.width  = '560px';
+      spotlight.style.height = '560px';
+      spotlight.style.transition = 'width 0.3s ease, height 0.3s ease';
     });
     el.addEventListener('mouseleave', () => {
       spotlight.style.width  = '420px';
@@ -2555,30 +2609,36 @@ function initSmoothScroll() {
    ================================================================ */
 function initImageFadeIn() {
   document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-    img.style.transition = 'opacity 0.7s cubic-bezier(0.25,0.46,0.45,0.94)';
     if (img.complete && img.naturalWidth > 0) {
       img.style.opacity = '1';
     } else {
       img.style.opacity = '0';
-      img.addEventListener('load',  () => { img.style.opacity = '1'; });
-      img.addEventListener('error', () => { img.style.opacity = '1'; });
+      img.addEventListener('load',  () => { img.style.opacity = '1'; }, { once: true });
+      img.addEventListener('error', () => { img.style.opacity = '1'; }, { once: true });
     }
   });
 }
 
 
 /* ================================================================
-   12. Parallax on Hero Image
+   12. Parallax on Hero Image (RAF Throttled & Hardware Accelerated)
    ================================================================ */
 function initHeroParallax() {
   const heroBg = document.querySelector('.hero-bg-img');
   if (!heroBg) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  let ticking = false;
   window.addEventListener('scroll', () => {
-    const scrolled = window.scrollY;
-    if (scrolled < window.innerHeight) {
-      heroBg.style.transform = `scale(1) translateY(${scrolled * 0.22}px)`;
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const scrolled = window.scrollY;
+        if (scrolled <= window.innerHeight) {
+          heroBg.style.transform = `scale(1) translate3d(0, ${(scrolled * 0.22).toFixed(1)}px, 0)`;
+        }
+        ticking = false;
+      });
+      ticking = true;
     }
   }, { passive: true });
 }

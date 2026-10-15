@@ -175,8 +175,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .reveal-card:nth-child(6) { transition-delay: 0.31s; }
 
 
-/* ── C. Shimmer sweep on images (loading state → loaded) ── */
-.product-image-wrap::before {
+/* ── C. Shimmer sweep on images (only when actively loading) ── */
+.product-image-wrap.is-loading::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -190,28 +190,27 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
   pointer-events: none;
-  opacity: 0;
+  opacity: 0.6;
 }
-.product-image-wrap:hover::before { animation: none; }
 
 @keyframes shimmer {
-  0%   { background-position: 200% 0; opacity: 0.6; }
-  100% { background-position: -200% 0; opacity: 0; }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 
-/* ── D. Gold cursor spotlight ── */
+/* ── D. Gold cursor spotlight (High performance GPU transform) ── */
 .cursor-spotlight {
   position: fixed;
+  top: 0; left: 0;
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 152, 106, 0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(184, 152, 106, 0.075) 0%, transparent 70%);
   pointer-events: none;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-1000px, -1000px, 0) translate(-50%, -50%);
   z-index: 9999;
-  transition: left 0.08s linear, top 0.08s linear;
-  mix-blend-mode: multiply;
+  will-change: transform;
 }
 
 
@@ -631,6 +630,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   object-position: center;
   transform: scale(1.06);
   animation: heroZoom 14s var(--ease-luxury) forwards;
+  will-change: transform;
 }
 
 /* Multi-layer overlay: dark vignette + warm color wash */
@@ -817,8 +817,13 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   gap: var(--space-xl) var(--space-lg);
 }
 
-/* Product Card */
-.product-card { display: flex; flex-direction: column; }
+/* Product Card — Fast Rendering via Content-Visibility */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 540px;
+}
 
 .product-card-link {
   display: flex; flex-direction: column;
