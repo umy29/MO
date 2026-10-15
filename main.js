@@ -1089,6 +1089,83 @@ window.addEventListener('scroll', () => {
 
 handleNavScroll(); // run on load
 
+/* ================================================================
+   2B. Mobile Navigation Drawer Controller
+   ================================================================ */
+function initMobileNav() {
+  const toggleBtn = document.getElementById('mobile-nav-toggle');
+  const drawer    = document.getElementById('mobile-nav-drawer');
+  const backdrop  = document.getElementById('mobile-nav-backdrop');
+  const closeBtn  = document.getElementById('mobile-nav-close');
+  const links     = document.querySelectorAll('.mobile-nav-link');
+  const consultBtn = document.getElementById('btn-mobile-consult');
+
+  if (!toggleBtn || !drawer) return;
+
+  function openMobileNav() {
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    toggleBtn.classList.add('is-active');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('nav-drawer-locked');
+  }
+
+  function closeMobileNav() {
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    toggleBtn.classList.remove('is-active');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-drawer-locked');
+  }
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (drawer.classList.contains('is-open')) {
+      closeMobileNav();
+    } else {
+      openMobileNav();
+    }
+  });
+
+  closeBtn?.addEventListener('click', closeMobileNav);
+  backdrop?.addEventListener('click', closeMobileNav);
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = link.getAttribute('href');
+      closeMobileNav();
+
+      const target = document.querySelector(href);
+      if (target) {
+        setTimeout(() => {
+          const navH = 64;
+          const targetY = target.getBoundingClientRect().top + window.scrollY - navH;
+          smoothLuxuryScrollTo(Math.max(0, targetY), 850);
+        }, 150);
+      }
+    });
+  });
+
+  consultBtn?.addEventListener('click', () => {
+    closeMobileNav();
+    const inquiryDrawer = document.getElementById('inquiry-drawer');
+    if (inquiryDrawer) {
+      setTimeout(() => {
+        inquiryDrawer.classList.add('is-open');
+        inquiryDrawer.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-locked');
+      }, 350);
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+      closeMobileNav();
+    }
+  });
+}
+
 
 /* ================================================================
    3. Scroll Reveal (IntersectionObserver)
@@ -1943,6 +2020,98 @@ function initProductShowcaseModal() {
     }
   });
 
+  /* --- Mobile Cell Phone Touch Gestures on Modal Stage --- */
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let touchLastTapTime = 0;
+  let touchInitialDist = 0;
+  let touchInitialZoom = 1.0;
+  let isTouchPanning = false;
+
+  if (stage) {
+    stage.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
+
+      if (e.touches.length === 1) {
+        const now = performance.now();
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = now;
+        dragStartX = touchStartX;
+        dragStartY = touchStartY;
+        panStartX = targetPanX;
+        panStartY = targetPanY;
+
+        // Double tap detection for quick mobile zoom toggle
+        if (now - touchLastTapTime < 320) {
+          if (targetZoom > 1.2) {
+            setZoom(1.0);
+          } else {
+            setZoom(2.0);
+          }
+          touchLastTapTime = 0;
+          return;
+        }
+        touchLastTapTime = now;
+
+        if (targetZoom > 1.05) {
+          isTouchPanning = true;
+        }
+      } else if (e.touches.length === 2) {
+        isTouchPanning = false;
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        touchInitialDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        touchInitialZoom = targetZoom;
+      }
+    }, { passive: true });
+
+    stage.addEventListener('touchmove', (e) => {
+      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
+
+      if (e.touches.length === 1 && isTouchPanning && targetZoom > 1.05) {
+        const dx = e.touches[0].clientX - dragStartX;
+        const dy = e.touches[0].clientY - dragStartY;
+        const maxPan = 240 * (targetZoom - 0.7);
+        targetPanX = Math.min(Math.max(panStartX + dx, -maxPan), maxPan);
+        targetPanY = Math.min(Math.max(panStartY + dy, -maxPan), maxPan);
+      } else if (e.touches.length === 2 && touchInitialDist > 10) {
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+        const scale = currentDist / touchInitialDist;
+        setZoom(Math.min(Math.max(touchInitialZoom * scale, 1.0), 3.0));
+      }
+    }, { passive: true });
+
+    stage.addEventListener('touchend', (e) => {
+      if (isTouchPanning) {
+        isTouchPanning = false;
+        return;
+      }
+
+      if (e.changedTouches.length === 1 && targetZoom <= 1.05) {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        const elapsed = performance.now() - touchStartTime;
+
+        // Detect horizontal swipe gesture: min 45px distance within 650ms, predominantly horizontal
+        if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.35 && elapsed < 650) {
+          if (deltaX < 0) {
+            // Swiped left -> Next piece
+            navigateProduct(1);
+          } else {
+            // Swiped right -> Previous piece
+            navigateProduct(-1);
+          }
+        }
+      }
+    }, { passive: true });
+  }
+
   /* --- Product Card Clicks in Gallery --- */
   document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', (e) => {
@@ -2419,6 +2588,7 @@ function initHeroParallax() {
    13. Initialize Everything on DOM Ready
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
+  initMobileNav();
   initScrollReveal();
   initPartnersCarousel();
   initProductFilters();

@@ -25,17 +25,89 @@
   ============================================================ -->
   <header class="site-header" id="site-header" role="banner">
     <nav class="nav-inner" aria-label="Main navigation">
-      <!-- Left: Nav Links -->
+      <!-- Brand Logo -->
+      <a href="#" class="nav-logo" aria-label="Maison Forme Architectural Doors">
+        <span class="logo-line">MAISON FORME</span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
       <ul class="nav-links nav-links--left" role="list">
         <li><a href="#collection" class="nav-link" id="nav-collection">Collection</a></li>
         <li><a href="#craftsmanship" class="nav-link" id="nav-craft">Craftsmanship</a></li>
-        <li><a href="#story" class="nav-link" id="nav-story">Our Story</a></li>
+        <li><a href="#partners" class="nav-link" id="nav-partners">Partners</a></li>
+        <li><a href="#footer" class="nav-link" id="nav-contact">Contact</a></li>
       </ul>
 
-
-
+      <!-- Mobile Navigation Hamburger Toggle -->
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobile-nav-drawer">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
     </nav>
   </header>
+
+  <!-- ============================================================
+       MOBILE NAVIGATION DRAWER — Full-Screen Luxury Overlay
+  ============================================================ -->
+  <div class="mobile-nav-drawer" id="mobile-nav-drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+    <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
+    <div class="mobile-nav-panel">
+      <div class="mobile-nav-header">
+        <div class="mobile-nav-brand">
+          <span class="logo-line">MAISON FORME</span>
+          <span class="mobile-brand-sub">WPC Architectural Systems</span>
+        </div>
+        <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close menu">&times;</button>
+      </div>
+
+      <div class="mobile-nav-body">
+        <ul class="mobile-nav-links" role="list">
+          <li>
+            <a href="#collection" class="mobile-nav-link" id="m-nav-collection">
+              <span class="m-link-num">01</span>
+              <span class="m-link-text">Collection</span>
+              <span class="m-link-arrow">&rarr;</span>
+            </a>
+          </li>
+          <li>
+            <a href="#craftsmanship" class="mobile-nav-link" id="m-nav-craft">
+              <span class="m-link-num">02</span>
+              <span class="m-link-text">Craftsmanship</span>
+              <span class="m-link-arrow">&rarr;</span>
+            </a>
+          </li>
+          <li>
+            <a href="#partners" class="mobile-nav-link" id="m-nav-partners">
+              <span class="m-link-num">03</span>
+              <span class="m-link-text">Partners</span>
+              <span class="m-link-arrow">&rarr;</span>
+            </a>
+          </li>
+          <li>
+            <a href="#footer" class="mobile-nav-link" id="m-nav-contact">
+              <span class="m-link-num">04</span>
+              <span class="m-link-text">Contact</span>
+              <span class="m-link-arrow">&rarr;</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="mobile-nav-cta-wrap">
+          <button class="btn-primary mobile-nav-cta-btn" id="btn-mobile-consult">
+            <span class="btn-text">Schedule Consultation</span>
+            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+
+        <div class="mobile-nav-footer">
+          <p class="m-footer-location">Bole Sub-City &middot; Addis Ababa, Ethiopia</p>
+          <p class="m-footer-contact">+251 911 234 567 &middot; atelier@maisonforme.com</p>
+          <span class="m-footer-cert">ISO 9001 &middot; 25-Year Warranty</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <!-- ============================================================
@@ -1692,11 +1764,15 @@
 
           <!-- Drawer Footer: Quick Return to Full Image View -->
           <div class="dossier-drawer-footer">
+            <button class="btn-primary btn-inquire-modal" id="btn-open-inquiry">
+              <span>Inquire About This Piece</span>
+              <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+            </button>
             <button class="btn-drawer-return" id="btn-drawer-back-to-stage">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
-              <span>Back to Full Screen Studio View</span>
+              <span>Back to Studio View</span>
             </button>
           </div>
         </aside>
