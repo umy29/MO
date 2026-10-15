@@ -1208,40 +1208,87 @@ function initPartnersCarousel() {
 
 
 /* ================================================================
-   5. Product Category Filter
+   5. Product Category Filter & Dual-Column Gallery Representation
    ================================================================ */
 function initProductFilters() {
-  const btns  = document.querySelectorAll('.filter-btn');
-  const cards = document.querySelectorAll('.product-card');
+  const btns        = document.querySelectorAll('.filter-btn');
+  const cards       = document.querySelectorAll('.product-card');
+  const grid        = document.getElementById('product-grid');
+  const liveCountEl = document.getElementById('collection-live-count');
+  const bannerEl    = document.getElementById('category-context-banner');
 
-  if (!btns.length || !cards.length) return;
+  if (!btns.length || !cards.length || !grid) return;
 
-  cards.forEach(card => {
-    card.style.transition = 'opacity 0.45s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)';
-  });
+  function enforceTwoColumns() {
+    grid.classList.add('grid-2-cols');
+    grid.classList.remove('grid-4-cols', 'grid-3-cols');
+    grid.style.setProperty('display', 'grid', 'important');
+    grid.style.setProperty('grid-template-columns', 'repeat(2, 1fr)', 'important');
+  }
 
+  // Always enforce standard 2-column exhibition representation across all filters
+  enforceTwoColumns();
+
+  function updateCollectionStatus(filter, count) {
+    if (!liveCountEl) return;
+    if (filter === 'all') {
+      liveCountEl.textContent = `Displaying ${count} Masterpieces · Dual-Column View`;
+    } else if (filter === 'internal-door') {
+      liveCountEl.textContent = `Displaying ${count} Internal Doors · Dual-Column View`;
+    } else if (filter === 'main-entrance-door') {
+      liveCountEl.textContent = `Displaying ${count} Main Entrance Portals · Dual-Column View`;
+    } else {
+      liveCountEl.textContent = `Displaying ${count} Curated Pieces · Dual-Column View`;
+    }
+  }
+
+  // Filter button interaction
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.getAttribute('data-filter');
 
-      btns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      // Re-assert 2-column layout on every filter interaction
+      enforceTwoColumns();
+
+      // Update button active state
+      btns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
 
+      // Internal Doors Curation Context Banner
+      if (filter === 'internal-door') {
+        if (bannerEl) bannerEl.style.display = 'block';
+      } else {
+        if (bannerEl) bannerEl.style.display = 'none';
+      }
+
+      // Filter cards instantly without lag, flash, or offscreen blanking
+      let visibleCount = 0;
       cards.forEach(card => {
         const match = filter === 'all' || card.dataset.category === filter;
         if (match) {
+          card.classList.remove('is-hidden');
           card.style.display = 'flex';
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0) scale(1)';
-          }));
+          card.classList.add('is-visible');
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0) scale(1)';
+
+          // If lazy image hasn't loaded yet, kickstart its loading
+          const img = card.querySelector('img');
+          if (img && img.loading === 'lazy' && !img.complete) {
+            img.loading = 'eager';
+          }
+          visibleCount++;
         } else {
-          card.style.opacity = '0';
-          card.style.transform = 'translateY(20px) scale(0.97)';
-          setTimeout(() => { if (card.style.opacity === '0') card.style.display = 'none'; }, 450);
+          card.classList.add('is-hidden');
+          card.style.display = 'none';
         }
       });
+
+      updateCollectionStatus(filter, visibleCount);
     });
   });
 
@@ -1969,8 +2016,17 @@ function initProductShowcaseModal() {
       seriesNav.textContent = p.series;
       seriesNav.title = p.series;
     }
-    if (modalStory) modalStory.innerHTML = p.story || CHAROT_ECO_STORY_HTML;
-    if (counter) counter.textContent = `${currentProductIndex + 1} / ${PRODUCT_KEYS.length}`;
+    const visibleCards = Array.from(document.querySelectorAll('.product-card:not(.is-hidden)'));
+    const visibleKeys = visibleCards.map(c => c.getAttribute('data-product-id')).filter(id => id && PRODUCTS[id]);
+    const keysToUse = visibleKeys.length > 0 ? visibleKeys : PRODUCT_KEYS;
+    const curSubIdx = keysToUse.indexOf(key);
+    if (counter) {
+      if (curSubIdx >= 0) {
+        counter.textContent = `${curSubIdx + 1} / ${keysToUse.length}`;
+      } else {
+        counter.textContent = `${currentProductIndex + 1} / ${PRODUCT_KEYS.length}`;
+      }
+    }
 
     // Stage Dimensions
     applyProductDimensions(p);
@@ -2031,8 +2087,12 @@ function initProductShowcaseModal() {
 
   /* --- Next / Previous Navigation --- */
   function navigateProduct(delta) {
-    let nextIdx = (currentProductIndex + delta + PRODUCT_KEYS.length) % PRODUCT_KEYS.length;
-    openProduct(PRODUCT_KEYS[nextIdx]);
+    const visibleCards = Array.from(document.querySelectorAll('.product-card:not(.is-hidden)'));
+    const visibleKeys = visibleCards.map(c => c.getAttribute('data-product-id')).filter(id => id && PRODUCTS[id]);
+    const keysToUse = visibleKeys.length > 0 ? visibleKeys : PRODUCT_KEYS;
+    const curIdx = keysToUse.indexOf(currentKey);
+    let nextIdx = curIdx >= 0 ? (curIdx + delta + keysToUse.length) % keysToUse.length : 0;
+    openProduct(keysToUse[nextIdx]);
   }
 
   prevBtn?.addEventListener('click', () => navigateProduct(-1));
