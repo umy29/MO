@@ -1359,7 +1359,6 @@ function initProductShowcaseModal() {
   const tabLoupe         = document.getElementById('tab-view-loupe');
   const mobileTabPrimary = document.getElementById('mobile-tab-primary');
   const mobileTabLoupe   = document.getElementById('mobile-tab-loupe');
-  const mobileLoupeHud   = document.getElementById('mobile-loupe-hud');
   const btnToggleDims    = document.getElementById('btn-toggle-dimensions');
   const btnResetView     = document.getElementById('btn-reset-view');
 
@@ -1529,8 +1528,8 @@ function initProductShowcaseModal() {
       }
 
       if (floorShadow) {
-        const shadowShiftX = (-currentTiltY * 1.5).toFixed(1);
-        const shadowShiftY = (currentTiltX * 0.85).toFixed(1);
+        const shadowShiftX = (currentPanX * 0.45 - currentTiltY * 1.6).toFixed(1);
+        const shadowShiftY = (currentPanY * 0.25 + currentTiltX * 0.9).toFixed(1);
         const shadowScale = (1 + (currentZoom - 1) * 0.35).toFixed(2);
         floorShadow.style.transform = `translateX(-50%) translate3d(${shadowShiftX}px, ${shadowShiftY}px, 0) scale(${shadowScale})`;
       }
@@ -1823,7 +1822,7 @@ function initProductShowcaseModal() {
 
   // Stage background interaction / dismiss tooltip / tap to place loupe
   stage.addEventListener('click', (e) => {
-    if (e.target.closest('.hotspot-pin') || e.target.closest('.stage-craft-banner') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.mobile-stage-mode-pill') || e.target.closest('.mobile-loupe-hud')) return;
+    if (e.target.closest('.hotspot-pin') || e.target.closest('.stage-craft-banner') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.mobile-stage-mode-pill')) return;
 
     if (currentViewMode === 'loupe') {
       const rect = stage.getBoundingClientRect();
@@ -1898,9 +1897,6 @@ function initProductShowcaseModal() {
     });
 
     stage.classList.remove('is-loupe-mode');
-    if (mobileLoupeHud) {
-      mobileLoupeHud.classList.remove('is-visible');
-    }
 
     if (mode === 'primary') {
       tabPrimary?.classList.add('active');
@@ -1916,11 +1912,8 @@ function initProductShowcaseModal() {
       stage.classList.add('is-loupe-mode');
       craftBanner?.classList.remove('is-visible');
       document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('is-active'));
-      if (mobileLoupeHud) {
-        mobileLoupeHud.classList.add('is-visible');
-      }
 
-      // If on mobile view, immediately place the loupe lens over the door handle/lock area
+      // If on mobile view, immediately place the loupe lens over the door handle/lock area cleanly
       if (isMobileView()) {
         setTimeout(() => {
           positionLoupeAtImageRel(0.55, 0.48);
@@ -1938,18 +1931,6 @@ function initProductShowcaseModal() {
   mobileTabLoupe?.addEventListener('click', (e) => {
     e.stopPropagation();
     setViewMode('loupe');
-  });
-
-  // Mobile quick detail feature chips
-  document.querySelectorAll('.loupe-chip').forEach(chip => {
-    chip.addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.querySelectorAll('.loupe-chip').forEach(c => c.classList.remove('is-active'));
-      chip.classList.add('is-active');
-      const rx = parseFloat(chip.getAttribute('data-rel-x')) || 0.5;
-      const ry = parseFloat(chip.getAttribute('data-rel-y')) || 0.5;
-      positionLoupeAtImageRel(rx, ry);
-    });
   });
 
   /* --- Architectural Dimensions Toggle --- */
@@ -2224,7 +2205,7 @@ function initProductShowcaseModal() {
 
   if (stage) {
     stage.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner') || e.target.closest('.mobile-stage-mode-pill') || e.target.closest('.mobile-loupe-hud')) return;
+      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner') || e.target.closest('.mobile-stage-mode-pill')) return;
 
       if (e.touches.length === 1) {
         const now = performance.now();
@@ -2277,7 +2258,7 @@ function initProductShowcaseModal() {
     }, { passive: true });
 
     stage.addEventListener('touchmove', (e) => {
-      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner') || e.target.closest('.mobile-stage-mode-pill') || e.target.closest('.mobile-loupe-hud')) return;
+      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner') || e.target.closest('.mobile-stage-mode-pill')) return;
 
       // In Loupe mode: smoothly track the touch finger across the door texture
       if (currentViewMode === 'loupe') {
@@ -2289,24 +2270,33 @@ function initProductShowcaseModal() {
         return;
       }
 
-      // In Photo mode on mobile: interactive 3D lighting sheen and subtle parallax reflection
+      // In Photo mode on mobile: dynamic tactile 3D motion, translation, and specular lighting
       if (isMobileView()) {
         if (e.touches.length === 1) {
           const t = e.touches[0];
           const rect = stage.getBoundingClientRect();
+          const dx = t.clientX - touchStartX;
+          const dy = t.clientY - touchStartY;
+
+          // Rich tactile physical translation: photo follows and glides with touch
+          const maxPanX = 110;
+          const maxPanY = 85;
+          targetPanX = Math.max(-maxPanX, Math.min(maxPanX, dx * 0.72));
+          targetPanY = Math.max(-maxPanY, Math.min(maxPanY, dy * 0.58));
+
+          // Expressive 3D perspective rotation (tilts horizontally up to 18deg, vertically up to 15deg)
+          const normX = Math.max(-1, Math.min(1, dx / 110));
+          const normY = Math.max(-1, Math.min(1, dy / 110));
+          targetTiltY = normX * 18;
+          targetTiltX = -normY * 15;
+
+          // Interactive specular studio lighting moving across the door surface
           const relX = (t.clientX - rect.left) / rect.width;
           const relY = (t.clientY - rect.top) / rect.height;
-          const normX = (relX - 0.5) * 2;
-          const normY = (relY - 0.5) * 2;
-
-          // Interactive specular light sheen moving with touch across door surface
           if (sheen) {
-            sheen.style.background = `radial-gradient(circle at ${(relX * 100).toFixed(1)}% ${(relY * 100).toFixed(1)}%, rgba(255, 255, 255, 0.45) 0%, transparent 60%)`;
+            sheen.style.background = `radial-gradient(circle at ${(relX * 100).toFixed(1)}% ${(relY * 100).toFixed(1)}%, rgba(255, 255, 255, 0.48) 0%, transparent 60%)`;
           }
 
-          // Subtle tactile 3D parallax response (within ±4deg)
-          targetTiltX = -normY * 3.5;
-          targetTiltY = normX * 4;
           requestTiltUpdate();
         }
         return;
@@ -2334,8 +2324,10 @@ function initProductShowcaseModal() {
         return;
       }
 
-      // In Photo mode on mobile: smoothly reset 3D tilt back to center
+      // In Photo mode on mobile: smoothly spring photo and 3D tilt back to center
       if (isMobileView()) {
+        targetPanX = 0;
+        targetPanY = 0;
         targetTiltX = 0;
         targetTiltY = 0;
         requestTiltUpdate();
@@ -2354,8 +2346,8 @@ function initProductShowcaseModal() {
         const deltaY = touchEndY - touchStartY;
         const elapsed = performance.now() - touchStartTime;
 
-        // Detect horizontal swipe gesture: min 45px distance within 650ms, predominantly horizontal
-        if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.35 && elapsed < 650) {
+        // Detect horizontal swipe gesture: min 65px distance within 450ms, predominantly horizontal
+        if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > Math.abs(deltaY) * 1.35 && elapsed < 450) {
           if (deltaX < 0) {
             // Swiped left -> Next piece
             navigateProduct(1);
