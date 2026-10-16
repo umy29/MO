@@ -1523,15 +1523,41 @@ function initProductShowcaseModal() {
       currentPanX  += (targetPanX  - currentPanX)  * 0.16;
       currentPanY  += (targetPanY  - currentPanY)  * 0.16;
 
-      if (product3dWrap) {
-        product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(1)}px, ${currentPanY.toFixed(1)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
-      }
+      if (isMobileView()) {
+        // Mobile view: Keep outer wrapper box and shadow 100% stationary and centered
+        if (product3dWrap) {
+          product3dWrap.style.transform = '';
+        }
+        if (floorShadow) {
+          floorShadow.style.transform = 'translateX(-50%)';
+        }
 
-      if (floorShadow) {
-        const shadowShiftX = (currentPanX * 0.45 - currentTiltY * 1.6).toFixed(1);
-        const shadowShiftY = (currentPanY * 0.25 + currentTiltX * 0.9).toFixed(1);
-        const shadowScale = (1 + (currentZoom - 1) * 0.35).toFixed(2);
-        floorShadow.style.transform = `translateX(-50%) translate3d(${shadowShiftX}px, ${shadowShiftY}px, 0) scale(${shadowScale})`;
+        // Apply motion EXCLUSIVELY to the door image itself (and its sheen highlight)
+        if (primaryImg) {
+          primaryImg.style.transform = `perspective(900px) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+          primaryImg.style.transformOrigin = 'center center';
+        }
+        if (sheen) {
+          sheen.style.transform = primaryImg ? primaryImg.style.transform : '';
+          sheen.style.transformOrigin = 'center center';
+        }
+      } else {
+        // Desktop view
+        if (primaryImg) {
+          primaryImg.style.transform = '';
+        }
+        if (sheen) {
+          sheen.style.transform = '';
+        }
+        if (product3dWrap) {
+          product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(1)}px, ${currentPanY.toFixed(1)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+        }
+        if (floorShadow) {
+          const shadowShiftX = (currentPanX * 0.45 - currentTiltY * 1.6).toFixed(1);
+          const shadowShiftY = (currentPanY * 0.25 + currentTiltX * 0.9).toFixed(1);
+          const shadowScale = (1 + (currentZoom - 1) * 0.35).toFixed(2);
+          floorShadow.style.transform = `translateX(-50%) translate3d(${shadowShiftX}px, ${shadowShiftY}px, 0) scale(${shadowScale})`;
+        }
       }
 
       tiltRafId = requestAnimationFrame(animateTilt);
@@ -1541,8 +1567,34 @@ function initProductShowcaseModal() {
       currentZoom  = targetZoom;
       currentPanX  = targetPanX;
       currentPanY  = targetPanY;
-      if (product3dWrap) {
-        product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(1)}px, ${currentPanY.toFixed(1)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+
+      if (isMobileView()) {
+        if (product3dWrap) {
+          product3dWrap.style.transform = '';
+        }
+        if (floorShadow) {
+          floorShadow.style.transform = 'translateX(-50%)';
+        }
+        if (primaryImg) {
+          primaryImg.style.transform = (Math.abs(currentTiltX) < 0.05 && Math.abs(currentTiltY) < 0.05)
+            ? ''
+            : `perspective(900px) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+          primaryImg.style.transformOrigin = 'center center';
+        }
+        if (sheen) {
+          sheen.style.transform = primaryImg ? primaryImg.style.transform : '';
+          sheen.style.transformOrigin = 'center center';
+        }
+      } else {
+        if (primaryImg) {
+          primaryImg.style.transform = '';
+        }
+        if (sheen) {
+          sheen.style.transform = '';
+        }
+        if (product3dWrap) {
+          product3dWrap.style.transform = `translate3d(${currentPanX.toFixed(1)}px, ${currentPanY.toFixed(1)}px, 0px) scale(${currentZoom.toFixed(3)}) rotateX(${currentTiltX.toFixed(1)}deg) rotateY(${currentTiltY.toFixed(1)}deg)`;
+        }
       }
       tiltRafId = null;
     }
@@ -2122,6 +2174,8 @@ function initProductShowcaseModal() {
     // Reset visualizer zoom, pan, and mode
     targetTiltX = 0;
     targetTiltY = 0;
+    if (primaryImg) primaryImg.style.transform = '';
+    if (sheen) sheen.style.transform = '';
     setZoom(1.0);
     setViewMode('primary');
     modalBody?.scrollTo({ top: 0, behavior: 'auto' });
@@ -2152,6 +2206,8 @@ function initProductShowcaseModal() {
     dimOverlay?.classList.remove('is-visible');
     btnToggleDims?.classList.remove('active');
     craftBanner?.classList.remove('is-visible');
+    if (primaryImg) primaryImg.style.transform = '';
+    if (sheen) sheen.style.transform = '';
     setZoom(1.0);
     if (tiltRafId) {
       cancelAnimationFrame(tiltRafId);
@@ -2270,7 +2326,7 @@ function initProductShowcaseModal() {
         return;
       }
 
-      // In Photo mode on mobile: dynamic tactile 3D motion, translation, and specular lighting
+      // In Photo mode on mobile: dynamic tactile 3D motion confined strictly to the image
       if (isMobileView()) {
         if (e.touches.length === 1) {
           const t = e.touches[0];
@@ -2278,15 +2334,13 @@ function initProductShowcaseModal() {
           const dx = t.clientX - touchStartX;
           const dy = t.clientY - touchStartY;
 
-          // Rich tactile physical translation: photo follows and glides with touch
-          const maxPanX = 110;
-          const maxPanY = 85;
-          targetPanX = Math.max(-maxPanX, Math.min(maxPanX, dx * 0.72));
-          targetPanY = Math.max(-maxPanY, Math.min(maxPanY, dy * 0.58));
+          // Box translation is locked to 0 so the container box NEVER moves
+          targetPanX = 0;
+          targetPanY = 0;
 
-          // Expressive 3D perspective rotation (tilts horizontally up to 18deg, vertically up to 15deg)
-          const normX = Math.max(-1, Math.min(1, dx / 110));
-          const normY = Math.max(-1, Math.min(1, dy / 110));
+          // Expressive 3D perspective rotation on the image itself (tilts up to 18deg horizontally, 15deg vertically)
+          const normX = Math.max(-1, Math.min(1, dx / 80));
+          const normY = Math.max(-1, Math.min(1, dy / 80));
           targetTiltY = normX * 18;
           targetTiltX = -normY * 15;
 

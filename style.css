@@ -4579,6 +4579,18 @@ body.is-fullscreen #stage-craft-banner {
     max-width: 90%;
     max-height: 82%;
     touch-action: none;
+    transform: none !important;
+  }
+  .visualizer-img--primary {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform;
+    transform-origin: center center;
+  }
+  .product-sheen {
+    transform-origin: center center;
+    pointer-events: none;
+    opacity: 0.65;
   }
   .visualizer-img {
     max-width: 100%;
@@ -4590,6 +4602,7 @@ body.is-fullscreen #stage-craft-banner {
   .stage-floor-shadow {
     bottom: 3.5rem;
     width: 65%;
+    transform: translateX(-50%) !important;
   }
 
   /* Dimension lines on mobile */
