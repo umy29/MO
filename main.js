@@ -1355,10 +1355,13 @@ function initProductShowcaseModal() {
   }
 
   // View tabs & quick controls
-  const tabPrimary     = document.getElementById('tab-view-primary');
-  const tabLoupe       = document.getElementById('tab-view-loupe');
-  const btnToggleDims  = document.getElementById('btn-toggle-dimensions');
-  const btnResetView   = document.getElementById('btn-reset-view');
+  const tabPrimary       = document.getElementById('tab-view-primary');
+  const tabLoupe         = document.getElementById('tab-view-loupe');
+  const mobileTabPrimary = document.getElementById('mobile-tab-primary');
+  const mobileTabLoupe   = document.getElementById('mobile-tab-loupe');
+  const mobileLoupeHud   = document.getElementById('mobile-loupe-hud');
+  const btnToggleDims    = document.getElementById('btn-toggle-dimensions');
+  const btnResetView     = document.getElementById('btn-reset-view');
 
   // Zoom & Detail Inspection elements
   const btnZoomIn        = document.getElementById('btn-zoom-in');
@@ -1546,31 +1549,44 @@ function initProductShowcaseModal() {
     }
   }
 
-  /* --- High-Precision Optical Loupe Lens --- */
-  function updateLoupeLens(e, stageRect) {
+  /* --- High-Precision Optical Loupe Lens (Supports Desktop Mouse & Mobile Touchscreen) --- */
+  function updateLoupeLensAtClient(clientX, clientY, stageRect, isTouch = false) {
     if (!loupeLens || !loupeInner) return;
 
     const activeImg = primaryImg;
     if (!activeImg) return;
 
     const imgRect = activeImg.getBoundingClientRect();
-    const mouseX = e.clientX - stageRect.left;
-    const mouseY = e.clientY - stageRect.top;
+    const lensRadius = loupeLens.offsetWidth ? loupeLens.offsetWidth / 2 : (isTouch ? 77 : 95);
+    const zoomFactor = 3.2;
 
-    loupeLens.style.left = `${mouseX}px`;
-    loupeLens.style.top  = `${mouseY}px`;
+    const imgX = clientX - imgRect.left;
+    const imgY = clientY - imgRect.top;
 
-    const imgX = e.clientX - imgRect.left;
-    const imgY = e.clientY - imgRect.top;
-
-    if (imgX < -30 || imgX > imgRect.width + 30 || imgY < -30 || imgY > imgRect.height + 30) {
-      loupeLens.style.opacity = '0';
+    if (clientX < stageRect.left - 40 || clientX > stageRect.right + 40 ||
+        clientY < stageRect.top - 40 || clientY > stageRect.bottom + 40) {
+      if (!isTouch) loupeLens.style.opacity = '0';
       return;
     }
-    loupeLens.style.opacity = '1';
 
-    const zoomFactor = 2.8;
-    const lensRadius = 95;
+    let lensX = clientX - stageRect.left;
+    let lensY = clientY - stageRect.top;
+
+    if (isTouch) {
+      // Ergonomic offset: place lens above finger so user's finger never obscures the magnified detail
+      if (lensY > 135) {
+        lensY = lensY - 82;
+      } else {
+        lensY = lensY + 82;
+      }
+      // Keep lens cleanly within stage bounds
+      lensX = Math.max(lensRadius + 6, Math.min(stageRect.width - lensRadius - 6, lensX));
+      lensY = Math.max(lensRadius + 40, Math.min(stageRect.height - lensRadius - 6, lensY));
+    }
+
+    loupeLens.style.left = `${lensX.toFixed(1)}px`;
+    loupeLens.style.top  = `${lensY.toFixed(1)}px`;
+    loupeLens.style.opacity = '1';
 
     loupeInner.style.backgroundImage = `url('${activeImg.src}')`;
     loupeInner.style.backgroundSize = `${(imgRect.width * zoomFactor).toFixed(1)}px ${(imgRect.height * zoomFactor).toFixed(1)}px`;
@@ -1584,6 +1600,19 @@ function initProductShowcaseModal() {
     } else {
       loupeInner.style.filter = 'none';
     }
+  }
+
+  function updateLoupeLens(e, stageRect) {
+    updateLoupeLensAtClient(e.clientX, e.clientY, stageRect, false);
+  }
+
+  function positionLoupeAtImageRel(relX, relY) {
+    if (!primaryImg || !stage) return;
+    const stageRect = stage.getBoundingClientRect();
+    const imgRect = primaryImg.getBoundingClientRect();
+    const clientX = imgRect.left + imgRect.width * relX;
+    const clientY = imgRect.top + imgRect.height * relY;
+    updateLoupeLensAtClient(clientX, clientY, stageRect, true);
   }
 
   /* --- Interactive Stage Mouse & Drag Controls --- */
@@ -1792,9 +1821,16 @@ function initProductShowcaseModal() {
     });
   }
 
-  // Dismiss hotspot tooltip when clicking on stage background
+  // Stage background interaction / dismiss tooltip / tap to place loupe
   stage.addEventListener('click', (e) => {
-    if (e.target.closest('.hotspot-pin') || e.target.closest('.stage-craft-banner') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn')) return;
+    if (e.target.closest('.hotspot-pin') || e.target.closest('.stage-craft-banner') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.mobile-stage-mode-pill') || e.target.closest('.mobile-loupe-hud')) return;
+
+    if (currentViewMode === 'loupe') {
+      const rect = stage.getBoundingClientRect();
+      updateLoupeLensAtClient(e.clientX, e.clientY, rect, isMobileView());
+      return;
+    }
+
     document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('is-active'));
     craftBanner?.classList.remove('is-visible');
   });
@@ -1844,7 +1880,7 @@ function initProductShowcaseModal() {
     selectedFinish.textContent = finishes[0].name;
   }
 
-  /* --- Switch View Mode --- */
+  /* --- Switch View Mode (Studio Photo vs 3× Optical Macro Loupe) --- */
   function setViewMode(mode) {
     currentViewMode = mode;
     [tabPrimary, tabLoupe].forEach(t => {
@@ -1854,22 +1890,67 @@ function initProductShowcaseModal() {
       }
     });
 
+    [mobileTabPrimary, mobileTabLoupe].forEach(t => {
+      if (t) {
+        t.classList.remove('is-active');
+        t.setAttribute('aria-selected', 'false');
+      }
+    });
+
     stage.classList.remove('is-loupe-mode');
+    if (mobileLoupeHud) {
+      mobileLoupeHud.classList.remove('is-visible');
+    }
 
     if (mode === 'primary') {
       tabPrimary?.classList.add('active');
       tabPrimary?.setAttribute('aria-selected', 'true');
+      mobileTabPrimary?.classList.add('is-active');
+      mobileTabPrimary?.setAttribute('aria-selected', 'true');
+      if (loupeLens) loupeLens.style.opacity = '0';
     } else if (mode === 'loupe') {
       tabLoupe?.classList.add('active');
       tabLoupe?.setAttribute('aria-selected', 'true');
+      mobileTabLoupe?.classList.add('is-active');
+      mobileTabLoupe?.setAttribute('aria-selected', 'true');
       stage.classList.add('is-loupe-mode');
       craftBanner?.classList.remove('is-visible');
       document.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('is-active'));
+      if (mobileLoupeHud) {
+        mobileLoupeHud.classList.add('is-visible');
+      }
+
+      // If on mobile view, immediately place the loupe lens over the door handle/lock area
+      if (isMobileView()) {
+        setTimeout(() => {
+          positionLoupeAtImageRel(0.55, 0.48);
+        }, 60);
+      }
     }
   }
 
   tabPrimary?.addEventListener('click', () => setViewMode('primary'));
   tabLoupe?.addEventListener('click', () => setViewMode('loupe'));
+  mobileTabPrimary?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setViewMode('primary');
+  });
+  mobileTabLoupe?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setViewMode('loupe');
+  });
+
+  // Mobile quick detail feature chips
+  document.querySelectorAll('.loupe-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.loupe-chip').forEach(c => c.classList.remove('is-active'));
+      chip.classList.add('is-active');
+      const rx = parseFloat(chip.getAttribute('data-rel-x')) || 0.5;
+      const ry = parseFloat(chip.getAttribute('data-rel-y')) || 0.5;
+      positionLoupeAtImageRel(rx, ry);
+    });
+  });
 
   /* --- Architectural Dimensions Toggle --- */
   btnToggleDims?.addEventListener('click', () => {
@@ -2143,17 +2224,25 @@ function initProductShowcaseModal() {
 
   if (stage) {
     stage.addEventListener('touchstart', (e) => {
-      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
+      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner') || e.target.closest('.mobile-stage-mode-pill') || e.target.closest('.mobile-loupe-hud')) return;
 
       if (e.touches.length === 1) {
         const now = performance.now();
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
         touchStartTime = now;
         dragStartX = touchStartX;
         dragStartY = touchStartY;
         panStartX = targetPanX;
         panStartY = targetPanY;
+
+        // In Loupe mode: immediately activate and position the optical loupe lens on the touched point
+        if (currentViewMode === 'loupe') {
+          const rect = stage.getBoundingClientRect();
+          updateLoupeLensAtClient(t.clientX, t.clientY, rect, true);
+          return;
+        }
 
         // On mobile view: double-tap zoom and touch panning are completely disabled
         if (isMobileView()) {
@@ -2188,10 +2277,40 @@ function initProductShowcaseModal() {
     }, { passive: true });
 
     stage.addEventListener('touchmove', (e) => {
-      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner')) return;
+      if (e.target.closest('.hotspot-pin') || e.target.closest('.floating-stage-dock') || e.target.closest('.stage-dock-btn') || e.target.closest('.stage-craft-banner') || e.target.closest('.mobile-stage-mode-pill') || e.target.closest('.mobile-loupe-hud')) return;
 
-      // On mobile view: zoom and touch pan functionality does not exist
-      if (isMobileView()) return;
+      // In Loupe mode: smoothly track the touch finger across the door texture
+      if (currentViewMode === 'loupe') {
+        if (e.touches.length >= 1) {
+          const t = e.touches[0];
+          const rect = stage.getBoundingClientRect();
+          updateLoupeLensAtClient(t.clientX, t.clientY, rect, true);
+        }
+        return;
+      }
+
+      // In Photo mode on mobile: interactive 3D lighting sheen and subtle parallax reflection
+      if (isMobileView()) {
+        if (e.touches.length === 1) {
+          const t = e.touches[0];
+          const rect = stage.getBoundingClientRect();
+          const relX = (t.clientX - rect.left) / rect.width;
+          const relY = (t.clientY - rect.top) / rect.height;
+          const normX = (relX - 0.5) * 2;
+          const normY = (relY - 0.5) * 2;
+
+          // Interactive specular light sheen moving with touch across door surface
+          if (sheen) {
+            sheen.style.background = `radial-gradient(circle at ${(relX * 100).toFixed(1)}% ${(relY * 100).toFixed(1)}%, rgba(255, 255, 255, 0.45) 0%, transparent 60%)`;
+          }
+
+          // Subtle tactile 3D parallax response (within ±4deg)
+          targetTiltX = -normY * 3.5;
+          targetTiltY = normX * 4;
+          requestTiltUpdate();
+        }
+        return;
+      }
 
       if (e.touches.length === 1 && isTouchPanning && targetZoom > 1.05) {
         const dx = e.touches[0].clientX - dragStartX;
@@ -2210,6 +2329,18 @@ function initProductShowcaseModal() {
     }, { passive: true });
 
     stage.addEventListener('touchend', (e) => {
+      // In Loupe mode: loupe stays parked where released so mobile user can study the detail comfortably
+      if (currentViewMode === 'loupe') {
+        return;
+      }
+
+      // In Photo mode on mobile: smoothly reset 3D tilt back to center
+      if (isMobileView()) {
+        targetTiltX = 0;
+        targetTiltY = 0;
+        requestTiltUpdate();
+      }
+
       if (isTouchPanning) {
         isTouchPanning = false;
         return;
@@ -2235,6 +2366,21 @@ function initProductShowcaseModal() {
         }
       }
     }, { passive: true });
+
+    // Device orientation gyroscope for interactive specular light sheen in Photo mode
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (!modal || !modal.classList.contains('is-open')) return;
+        if (currentViewMode !== 'primary' || !isMobileView()) return;
+        if (typeof e.gamma === 'number' && typeof e.beta === 'number') {
+          const tiltY = Math.max(-6, Math.min(6, e.gamma * 0.2));
+          const tiltX = Math.max(-5, Math.min(5, (e.beta - 45) * 0.15));
+          targetTiltX = tiltX;
+          targetTiltY = tiltY;
+          requestTiltUpdate();
+        }
+      }, { passive: true });
+    }
 
     // Handle viewport resize: lock zoom and pan to default on mobile
     window.addEventListener('resize', () => {

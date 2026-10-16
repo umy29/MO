@@ -1538,6 +1538,40 @@
             <!-- Dynamic Studio Floor Contact Shadow -->
             <div class="stage-floor-shadow" id="stage-floor-shadow" aria-hidden="true"></div>
 
+            <!-- Mobile Interactive Display Mode Switcher (Photo / 3× Loupe) -->
+            <div class="mobile-stage-mode-pill" id="mobile-stage-mode-pill" role="tablist" aria-label="Mobile display mode">
+              <button class="mobile-mode-btn is-active" id="mobile-tab-primary" data-view="primary" role="tab" aria-selected="true" title="Full Studio Photo">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <span>Photo</span>
+              </button>
+              <button class="mobile-mode-btn" id="mobile-tab-loupe" data-view="loupe" role="tab" aria-selected="false" title="3× Optical Macro Loupe">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <line x1="11" y1="8" x2="11" y2="14" />
+                  <line x1="8" y1="11" x2="14" y2="11" />
+                </svg>
+                <span>3&times; Loupe</span>
+              </button>
+            </div>
+
+            <!-- Mobile Loupe Interactive HUD & Quick Detail Jump Chips -->
+            <div class="mobile-loupe-hud" id="mobile-loupe-hud" aria-live="polite">
+              <div class="mobile-loupe-hint">
+                <span class="loupe-hint-icon">&#128070;</span>
+                <span>Touch &amp; drag door to inspect &bull; Tap features below</span>
+              </div>
+              <div class="mobile-loupe-chips" id="mobile-loupe-chips">
+                <button class="loupe-chip is-active" data-rel-x="0.65" data-rel-y="0.50">Handle &amp; Lock</button>
+                <button class="loupe-chip" data-rel-x="0.40" data-rel-y="0.32">Wood Grain</button>
+                <button class="loupe-chip" data-rel-x="0.50" data-rel-y="0.10">Pivot Hinge</button>
+              </div>
+            </div>
+
             <!-- Floating Stage Zoom & Pan Indicator HUD -->
             <div class="stage-zoom-hud" id="stage-zoom-hud" aria-hidden="true">
               <span class="zoom-hud-icon">&#128269;</span>

@@ -3099,6 +3099,12 @@ body.is-fullscreen #stage-craft-banner {
 
 
 
+/* Mobile Display Mode Pill & Loupe HUD (Hidden by default on Desktop) */
+.mobile-stage-mode-pill,
+.mobile-loupe-hud {
+  display: none;
+}
+
 /* ================================================================
    Atelier Dossier Drawer (Off-Canvas Slide-Over Inspector)
    Zero obstruction on the full-screen visualizer stage
@@ -4609,6 +4615,152 @@ body.is-fullscreen #stage-craft-banner {
   .stage-dock-divider {
     display: none !important;
   }
+
+  /* Mobile Interactive Display Mode Switcher (Photo / 3× Loupe) */
+  .mobile-stage-mode-pill {
+    display: inline-flex !important;
+    position: absolute;
+    top: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 28;
+    background: rgba(250, 248, 243, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(197, 185, 168, 0.55);
+    border-radius: 9999px;
+    padding: 0.2rem;
+    height: 32px;
+    gap: 0.25rem;
+    box-shadow: 0 4px 18px rgba(26, 23, 20, 0.12), 0 1px 3px rgba(26, 23, 20, 0.05);
+  }
+  .mobile-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.75rem;
+    height: 28px;
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-warm-gray);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mobile-mode-btn svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+  .mobile-mode-btn.is-active {
+    background: var(--color-dark);
+    color: var(--color-ivory);
+    box-shadow: 0 2px 8px rgba(26, 23, 20, 0.22);
+  }
+  .mobile-mode-btn.is-active svg {
+    color: var(--color-gold);
+  }
+
+  /* Mobile Loupe HUD & Quick Detail Jump Chips */
+  .mobile-loupe-hud {
+    display: none;
+    position: absolute;
+    top: 3.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 27;
+    width: 92%;
+    max-width: 360px;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    pointer-events: none;
+  }
+  .mobile-loupe-hud.is-visible {
+    display: flex !important;
+  }
+  .mobile-loupe-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(26, 23, 20, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-ivory);
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    padding: 0.22rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(184, 152, 106, 0.35);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    text-align: center;
+  }
+  .mobile-loupe-chips {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    pointer-events: auto;
+  }
+  .loupe-chip {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(197, 185, 168, 0.65);
+    border-radius: 9999px;
+    padding: 0.22rem 0.65rem;
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--color-dark);
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(26, 23, 20, 0.08);
+    transition: all 0.2s ease;
+  }
+  .loupe-chip:active,
+  .loupe-chip.is-active {
+    background: var(--color-gold);
+    color: var(--color-dark);
+    border-color: var(--color-gold);
+    box-shadow: 0 3px 10px rgba(184, 152, 106, 0.35);
+    transform: scale(0.97);
+  }
+
+  /* Optimized Mobile Loupe Lens */
+  .loupe-lens {
+    width: 154px;
+    height: 154px;
+    border-width: 2.2px;
+    box-shadow:
+      0 14px 40px rgba(26, 23, 20, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.6),
+      inset 0 0 20px rgba(0, 0, 0, 0.25);
+  }
+  .loupe-crosshair {
+    width: 14px;
+    height: 14px;
+  }
+  .loupe-badge {
+    bottom: 8px;
+    font-size: 0.52rem;
+    padding: 0.12rem 0.4rem;
+    letter-spacing: 0.12em;
+  }
+
+  .visualizer-stage.is-loupe-mode {
+    touch-action: none !important;
+  }
+
   .stage-craft-banner {
     bottom: 1rem;
     left: 0.75rem;
