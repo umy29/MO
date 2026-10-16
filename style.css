@@ -1454,6 +1454,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   filter: drop-shadow(0 8px 18px rgba(184, 152, 106, 0.35));
 }
 
+/* Get-As optical visual balance: aspect ratio compensation so visual presence matches circular & horizontal partner logos */
+.partner-logo--getas,
+.partner-logo[src*="partner_getas"] {
+  max-height: 58px;
+}
+
 @media (max-width: 768px) {
   .partners-carousel-section {
     padding: 2.25rem 0 2rem;
@@ -1477,6 +1483,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
     max-height: 38px;
     max-width: 120px;
     border-radius: 6px;
+  }
+  .partner-logo--getas,
+  .partner-logo[src*="partner_getas"] {
+    max-height: 44px;
   }
 }
 
@@ -4401,6 +4411,10 @@ body.is-fullscreen #stage-craft-banner {
   .partner-logo {
     max-height: 32px;
     max-width: 105px;
+  }
+  .partner-logo--getas,
+  .partner-logo[src*="partner_getas"] {
+    max-height: 38px;
   }
 
   /* Footer on Mobile */
