@@ -2038,8 +2038,35 @@ function initProductShowcaseModal() {
   });
 
   /* --- Atelier Dossier Slide-Over Drawer Controller --- */
-  function openDossierDrawer() {
+  function setDossierTab(tabName) {
+    const pills = document.querySelectorAll('.dossier-tab-pill');
+    pills.forEach(p => {
+      const isTarget = p.getAttribute('data-drawer-tab') === tabName;
+      p.classList.toggle('is-active', isTarget);
+      p.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+    });
+
+    const storySec = document.getElementById('section-dossier-story');
+    const matSec   = document.getElementById('section-dossier-materials');
+
+    if (storySec && matSec) {
+      if (tabName === 'materials') {
+        storySec.classList.remove('is-active');
+        matSec.classList.add('is-active');
+      } else {
+        matSec.classList.remove('is-active');
+        storySec.classList.add('is-active');
+      }
+    }
+
+    dossierDrawerBody?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openDossierDrawer(initialTab = null) {
     if (!dossierDrawer) return;
+    if (initialTab) {
+      setDossierTab(initialTab);
+    }
     dossierDrawer.classList.add('is-open');
     dossierDrawer.setAttribute('aria-hidden', 'false');
     dossierBackdrop?.classList.add('is-open');
@@ -2056,11 +2083,11 @@ function initProductShowcaseModal() {
     btnDockDossier?.classList.remove('active');
   }
 
-  function toggleDossierDrawer() {
+  function toggleDossierDrawer(tab = null) {
     if (dossierDrawer?.classList.contains('is-open')) {
       closeDossierDrawer();
     } else {
-      openDossierDrawer();
+      openDossierDrawer(tab);
     }
   }
 
@@ -2091,16 +2118,12 @@ function initProductShowcaseModal() {
     closeDossierDrawer();
   });
 
-  // Drawer section tabs jumping
+  // Drawer section tabs switching
   dossierTabPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      dossierTabPills.forEach(p => p.classList.remove('is-active'));
-      pill.classList.add('is-active');
-      const targetTab = pill.getAttribute('data-drawer-tab');
-      const targetSec = document.getElementById(`section-dossier-${targetTab}`);
-      if (targetSec && dossierDrawerBody) {
-        targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetTab = pill.getAttribute('data-drawer-tab') || 'story';
+      setDossierTab(targetTab);
     });
   });
 
@@ -2161,6 +2184,97 @@ function initProductShowcaseModal() {
   document.addEventListener('mozfullscreenchange', syncFullscreenUI);
   document.addEventListener('MSFullscreenChange', syncFullscreenUI);
 
+  /* --- Populate Dossier Details (Story & Materials) --- */
+  function populateDossierDetails(p) {
+    if (!p) return;
+
+    // Story tab elements
+    const storyCat        = document.getElementById('modal-story-cat');
+    const storyEdition    = document.getElementById('modal-story-edition');
+    const storyHeading    = document.getElementById('modal-story-heading');
+    const storyNarrative  = document.getElementById('modal-story-narrative');
+    const storyProv       = document.getElementById('modal-story-provenance');
+    const storyOpening    = document.getElementById('modal-story-opening');
+    const storyCommission = document.getElementById('modal-story-commission');
+
+    if (storyCat) {
+      storyCat.textContent = p.category === 'internal-door' ? 'Internal Architectural Door' : 'Main Entrance Door';
+    }
+    if (storyEdition) {
+      storyEdition.textContent = p.edition || p.series || 'Villa Edition';
+    }
+    if (storyHeading) {
+      storyHeading.textContent = `${p.name} — Design Narrative`;
+    }
+    if (storyNarrative) {
+      const desc = p.shortDesc || '';
+      const catText = p.category === 'internal-door'
+        ? 'Engineered for seamless interior privacy, acoustic isolation, and architectural refinement in contemporary luxury residences.'
+        : 'Engineered as a monumental architectural portal, uniting majestic curb appeal, thermal weather sealing, and fortress-grade multi-point security.';
+      storyNarrative.textContent = `${desc} ${catText}`;
+    }
+    if (storyProv) {
+      storyProv.textContent = p.provenance || 'Artisan Architectural Joinery Studio, Italy';
+    }
+    if (storyOpening) {
+      storyOpening.textContent = p.dimensions?.seatHeight || (p.category === 'internal-door' ? 'Single Concealed Leaf Swing' : 'Grand Double Leaf Swing');
+    }
+    if (storyCommission) {
+      storyCommission.textContent = p.edition || 'Individually Serialized Atelier Commission';
+    }
+
+    // Materials tab elements
+    const matCore       = document.getElementById('modal-mat-core');
+    const matHardware   = document.getElementById('modal-mat-hardware');
+    const matOpening    = document.getElementById('modal-mat-opening');
+    const matDims       = document.getElementById('modal-mat-dims');
+    const matWeight     = document.getElementById('modal-mat-weight');
+    const matGlazing    = document.getElementById('modal-mat-glazing');
+    const matProv       = document.getElementById('modal-mat-provenance');
+    const matEdition    = document.getElementById('modal-mat-edition');
+
+    if (matCore) {
+      matCore.textContent = p.materialsDetail || 'Kiln-dried hardwood core with multi-layer acoustic dampening';
+    }
+    if (matHardware) {
+      const matParts = p.material ? p.material.split('·') : [];
+      const hwPart = matParts.length > 1 ? matParts[matParts.length - 1].trim() : 'Solid forged architectural hardware';
+      matHardware.textContent = `${hwPart} · Concealed European 180° bearing hinges`;
+    }
+    if (matOpening) {
+      matOpening.textContent = p.dimensions?.seatHeight || (p.category === 'internal-door' ? 'Acoustic Single Leaf' : 'Grand Double Leaf Swing');
+    }
+    if (matDims) {
+      const w = p.dimensions?.wCm || 120;
+      const h = p.dimensions?.hCm || 250;
+      matDims.innerHTML = `W: ${w} cm &times; H: ${h} cm &middot; ${(w/100).toFixed(2)} m &times; ${(h/100).toFixed(2)} m`;
+    }
+    if (matWeight) {
+      matWeight.textContent = p.dimensions?.weight || (p.category === 'internal-door' ? '48 kg' : '145 kg');
+    }
+    if (matGlazing) {
+      const nameLower = p.name.toLowerCase();
+      const hasGlass = nameLower.includes('glass') ||
+                       nameLower.includes('transom') ||
+                       nameLower.includes('porthole') ||
+                       nameLower.includes('eclipse') ||
+                       nameLower.includes('view') ||
+                       nameLower.includes('grill') ||
+                       nameLower.includes('lattice');
+      if (hasGlass) {
+        matGlazing.textContent = '12mm dual-laminated acoustic tempered glass (Low-E daylight coated)';
+      } else {
+        matGlazing.textContent = 'Solid engineered acoustic core (Rw 43dB, non-glazed)';
+      }
+    }
+    if (matProv) {
+      matProv.textContent = p.provenance || 'Artisan Architectural Joinery Studio, Italy';
+    }
+    if (matEdition) {
+      matEdition.textContent = p.edition || 'Numbered Atelier Series';
+    }
+  }
+
   /* --- Populate & Open Product Exhibition --- */
   function openProduct(key) {
     const p = PRODUCTS[key];
@@ -2178,6 +2292,9 @@ function initProductShowcaseModal() {
       seriesNav.textContent = p.series;
       seriesNav.title = p.series;
     }
+
+    // Populate Story & Materials Dossier
+    populateDossierDetails(p);
     const visibleCards = Array.from(document.querySelectorAll('.product-card:not(.is-hidden)'));
     const visibleKeys = visibleCards.map(c => c.getAttribute('data-product-id')).filter(id => id && PRODUCTS[id]);
     const keysToUse = visibleKeys.length > 0 ? visibleKeys : PRODUCT_KEYS;

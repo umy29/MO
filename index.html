@@ -1697,121 +1697,201 @@
 
           <!-- Drawer Navigation Tabs (Story, Materials) -->
           <nav class="dossier-tab-nav" aria-label="Dossier Sections">
-            <button class="dossier-tab-pill is-active" data-drawer-tab="story">Story</button>
-            <button class="dossier-tab-pill" data-drawer-tab="materials">Materials</button>
+            <button class="dossier-tab-pill is-active" data-drawer-tab="story" id="tab-pill-story">
+              <span>Story &amp; Narrative</span>
+            </button>
+            <button class="dossier-tab-pill" data-drawer-tab="materials" id="tab-pill-materials">
+              <span>Materials &amp; Specs</span>
+            </button>
           </nav>
 
           <!-- Scrollable Dossier Content Body -->
           <div class="dossier-drawer-body" id="dossier-drawer-body">
             
-            <!-- Section 1: Design Narrative -->
-            <section class="dossier-drawer-section" id="section-dossier-story">
+            <!-- Section 1: Design Narrative & Story (Active by default) -->
+            <section class="dossier-drawer-section is-active" id="section-dossier-story" role="tabpanel" aria-labelledby="tab-pill-story">
+              
+              <!-- Bespoke Piece Narrative Card -->
+              <div class="dossier-piece-card">
+                <div class="piece-card-header">
+                  <span class="piece-card-category" id="modal-story-cat">Main Entrance Door</span>
+                  <span class="piece-card-edition" id="modal-story-edition">Villa Architectural Edition</span>
+                </div>
+                <h3 class="piece-story-heading" id="modal-story-heading">Architectural Design Narrative</h3>
+                <p class="piece-story-text" id="modal-story-narrative">
+                  Architectural double entrance doors with dual vertical tempered glass viewports and handcrafted brass trim.
+                </p>
+                <div class="piece-meta-strip">
+                  <div class="meta-strip-item">
+                    <span class="meta-label">Provenance</span>
+                    <span class="meta-val" id="modal-story-provenance">Artisan Architectural Joinery Studio, Florence</span>
+                  </div>
+                  <div class="meta-strip-item">
+                    <span class="meta-label">Configuration</span>
+                    <span class="meta-val" id="modal-story-opening">Grand Double Leaf Swing</span>
+                  </div>
+                  <div class="meta-strip-item">
+                    <span class="meta-label">Commission</span>
+                    <span class="meta-val" id="modal-story-commission">Custom Commissioned Entryway &middot; Individually Serialized</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Charot Eco Performance Standards Header -->
               <div class="dossier-section-head">
                 <span class="section-num">01</span>
-                <h3 class="dossier-subtitle">Design Narrative</h3>
-              </div>
-              <div class="dossier-body" id="modal-story">
-                <div class="dossier-story-content">
-                  <h4 class="dossier-story-title">Sustainable Innovation Without Compromise</h4>
-                  <p class="dossier-story-intro">At Charot Eco Doors, we believe exceptional doors should deliver more than beautiful design. They should provide lasting durability, everyday comfort, and responsible performance. Our eco-door solutions combine innovative materials with practical features designed to meet the demands of modern living.</p>
-                  
-                  <div class="dossier-eco-features">
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">01</span>
-                        <h5 class="eco-item-title">Soundproof</h5>
-                      </div>
-                      <p class="eco-item-tagline">Peace and privacy in every space.</p>
-                      <p class="eco-item-desc">Designed to help minimize unwanted noise, Charot Eco Doors focus on sound-insulating construction that creates quieter, more comfortable indoor environments. Ideal for homes, offices, and private spaces where peace and privacy matter.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">02</span>
-                        <h5 class="eco-item-title">Fire Retardant</h5>
-                      </div>
-                      <p class="eco-item-tagline">An added layer of protection.</p>
-                      <p class="eco-item-desc">With fire-conscious material choices and appropriate protective treatments, our doors are designed to support improved fire safety while maintaining a refined appearance. We believe responsible design should consider both aesthetics and protection.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">03</span>
-                        <h5 class="eco-item-title">Antibacterial</h5>
-                      </div>
-                      <p class="eco-item-tagline">A cleaner approach to modern living.</p>
-                      <p class="eco-item-desc">Our focus on hygienic surfaces and antimicrobial protection helps support cleaner indoor environments. Designed for everyday spaces, this feature combines practical surface care with a commitment to comfort and well-being.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">04</span>
-                        <h5 class="eco-item-title">Termite Resistant</h5>
-                      </div>
-                      <p class="eco-item-tagline">Protection against hidden damage.</p>
-                      <p class="eco-item-desc">Designed with durability in mind, our doors can incorporate resistant composite materials and appropriate protective treatments to help guard against termite damage. The result is a dependable solution for environments where long-term material protection matters.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">05</span>
-                        <h5 class="eco-item-title">Crack and Warp Resistant</h5>
-                      </div>
-                      <p class="eco-item-tagline">Built to maintain their form.</p>
-                      <p class="eco-item-desc">Our focus on durable composite construction helps improve dimensional stability and reduce the risk of cracking, swelling, and warping under suitable conditions. This supports a consistent appearance and reliable performance over time.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">06</span>
-                        <h5 class="eco-item-title">Formaldehyde-Free and Low-Emission</h5>
-                      </div>
-                      <p class="eco-item-tagline">A healthier approach to indoor spaces.</p>
-                      <p class="eco-item-desc">We prioritize responsible material selection to support better indoor environments. Products verified as formaldehyde-free and low-emission can help reduce exposure to certain indoor pollutants, bringing greater confidence to modern living.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">07</span>
-                        <h5 class="eco-item-title">Mold Resistant</h5>
-                      </div>
-                      <p class="eco-item-tagline">Designed for moisture-conscious living.</p>
-                      <p class="eco-item-desc">Our moisture-conscious design approach helps protect door surfaces against conditions that encourage mold growth. This feature is particularly valuable in humid environments, helping maintain a cleaner appearance and dependable performance with proper care.</p>
-                    </div>
-
-                    <div class="dossier-eco-item">
-                      <div class="eco-item-header">
-                        <span class="eco-item-num">08</span>
-                        <h5 class="eco-item-title">Eco-Friendly Materials</h5>
-                      </div>
-                      <p class="eco-item-tagline">Better choices for a more sustainable future.</p>
-                      <p class="eco-item-desc">Sustainability is an important part of our design philosophy. By prioritizing eco-conscious materials, resource efficiency, and durable construction where possible, Charot Eco Doors aims to balance environmental responsibility with strength, functionality, and contemporary style.</p>
-                    </div>
-                  </div>
-
-                  <div class="dossier-story-footer">
-                    <h5 class="dossier-brand-title">Charot Eco Doors</h5>
-                    <p class="dossier-brand-tagline">Designed for Living. Built for the Future.</p>
-                    <p class="dossier-brand-desc">We bring together durability, thoughtful design, and sustainability to create door solutions that meet the needs of modern spaces without losing sight of what matters most: quality, comfort, and lasting value.</p>
-                  </div>
+                <div>
+                  <h4 class="dossier-subtitle">Charot Eco Performance Standards</h4>
+                  <p class="dossier-hint">Every piece is engineered to 8 fundamental architectural benchmarks:</p>
                 </div>
               </div>
-            </section>
 
-            <!-- Section 2: Material Palette & Finishes -->
-            <section class="dossier-drawer-section" id="section-dossier-materials">
-              <div class="dossier-section-head">
-                <span class="section-num">02</span>
-                <div class="finish-header">
-                  <h3 class="dossier-subtitle">Material Palette</h3>
-                  <span class="selected-finish-name" id="selected-finish-name">Ivory Boucle / White Oak</span>
+              <!-- 8 Eco Performance Pillars Grid -->
+              <div class="dossier-eco-grid" id="modal-eco-grid">
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">01</span>
+                    <h5 class="pillar-title">Soundproof</h5>
+                  </div>
+                  <p class="pillar-tagline">Rw 43&ndash;45dB acoustic isolation</p>
+                  <p class="pillar-desc">Multi-layer insulated core dampens airborne noise for serene, whisper-quiet interior and exterior spaces.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">02</span>
+                    <h5 class="pillar-title">Fire Retardant</h5>
+                  </div>
+                  <p class="pillar-tagline">Engineered fire-safe composite</p>
+                  <p class="pillar-desc">Protective fire-resistant treatments provide essential structural containment without toxic chemical additives.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">03</span>
+                    <h5 class="pillar-title">Antibacterial</h5>
+                  </div>
+                  <p class="pillar-tagline">Hygienic protective shield</p>
+                  <p class="pillar-desc">Antimicrobial surface finish inhibits bacterial accumulation for healthier residential and commercial living.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">04</span>
+                    <h5 class="pillar-title">Termite Resistant</h5>
+                  </div>
+                  <p class="pillar-tagline">Sub-surface bio-defense</p>
+                  <p class="pillar-desc">Dense engineered composites and protective sealants ensure impervious immunity against termites and wood-boring pests.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">05</span>
+                    <h5 class="pillar-title">Crack &amp; Warp Proof</h5>
+                  </div>
+                  <p class="pillar-tagline">Dimensional stability</p>
+                  <p class="pillar-desc">Cross-laminated kiln-dried core maintains absolute flatness and geometric alignment across seasonal humidity swings.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">06</span>
+                    <h5 class="pillar-title">Formaldehyde-Free</h5>
+                  </div>
+                  <p class="pillar-tagline">Zero-VOC emissions</p>
+                  <p class="pillar-desc">Conforms to rigorous clean air standards with zero added formaldehyde, fostering pristine indoor air quality.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">07</span>
+                    <h5 class="pillar-title">Mold Resistant</h5>
+                  </div>
+                  <p class="pillar-tagline">Hydrophobic barrier seal</p>
+                  <p class="pillar-desc">Sealed micro-elastomer perimeter gaskets and water-repellent coatings prevent moisture penetration and mold growth.</p>
+                </div>
+                <div class="eco-pillar-card">
+                  <div class="pillar-header">
+                    <span class="pillar-num">08</span>
+                    <h5 class="pillar-title">Eco-Friendly</h5>
+                  </div>
+                  <p class="pillar-tagline">FSC timber &amp; circular composite</p>
+                  <p class="pillar-desc">Responsibly sourced materials engineered for multi-decade longevity and lower architectural carbon footprint.</p>
                 </div>
               </div>
-              <p class="dossier-hint">Select a finish to preview custom tone on the studio piece:</p>
-              <div class="finishes-swatches" id="finishes-swatches"></div>
+
+              <!-- Brand Manifesto Box -->
+              <div class="dossier-brand-manifesto">
+                <div class="brand-manifesto-badge">Charot Eco Doors</div>
+                <h5 class="brand-manifesto-title">Designed for Living. Built for the Future.</h5>
+                <p class="brand-manifesto-desc">
+                  We harmonize artisanal joinery with next-generation material science to deliver architectural doors that embody uncompromising beauty, acoustic comfort, and sustainable longevity.
+                </p>
+              </div>
+
             </section>
 
+            <!-- Section 2: Material Palette & Specifications (Toggled via tab) -->
+            <section class="dossier-drawer-section" id="section-dossier-materials" role="tabpanel" aria-labelledby="tab-pill-materials">
+              
+              <!-- Material Finish Selector Card -->
+              <div class="dossier-materials-card">
+                <div class="dossier-section-head">
+                  <span class="section-num">02</span>
+                  <div class="finish-header">
+                    <h4 class="dossier-subtitle">Material Palette &amp; Finishes</h4>
+                    <span class="selected-finish-name" id="selected-finish-name">Alpine White (Verona)</span>
+                  </div>
+                </div>
+                <p class="dossier-hint">Select a curated atelier tone to preview custom finish on the piece:</p>
+                <div class="finishes-swatches" id="finishes-swatches"></div>
+              </div>
 
+              <!-- Architectural Specifications Table -->
+              <div class="dossier-specs-card">
+                <div class="dossier-section-head">
+                  <span class="section-num">03</span>
+                  <div>
+                    <h4 class="dossier-subtitle">Architectural Specifications</h4>
+                    <p class="dossier-hint">Technical metrics &amp; structural engineering dossier</p>
+                  </div>
+                </div>
+
+                <dl class="dossier-specs-list">
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Core &amp; Substrate</dt>
+                    <dd class="spec-value" id="modal-mat-core">Kiln-dried alpine hardwood core with acoustic barrier</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Hardware &amp; Trim</dt>
+                    <dd class="spec-value" id="modal-mat-hardware">Solid forged satin brass hardware</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Opening Configuration</dt>
+                    <dd class="spec-value" id="modal-mat-opening">Grand Double Leaf Swing</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Dimensions</dt>
+                    <dd class="spec-value" id="modal-mat-dims">W: 120 cm &times; H: 250 cm (1.20 m &times; 2.50 m)</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Total Architectural Mass</dt>
+                    <dd class="spec-value" id="modal-mat-weight">145 kg</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Glazing / Vision Panel</dt>
+                    <dd class="spec-value" id="modal-mat-glazing">12mm dual-laminated acoustic tempered glass</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Atelier Workshop</dt>
+                    <dd class="spec-value" id="modal-mat-provenance">Artisan Architectural Joinery Studio, Florence</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Edition &amp; Serial</dt>
+                    <dd class="spec-value" id="modal-mat-edition">Custom Commissioned Entryway &middot; Individually Serialized</dd>
+                  </div>
+                  <div class="dossier-spec-row">
+                    <dt class="spec-label">Sustainability Rating</dt>
+                    <dd class="spec-value">FSC-Certified Timber &middot; Zero Formaldehyde &middot; 100% Recyclable Packaging</dd>
+                  </div>
+                </dl>
+              </div>
+
+            </section>
 
           </div><!-- /dossier-drawer-body -->
 
