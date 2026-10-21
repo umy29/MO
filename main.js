@@ -1828,6 +1828,7 @@ function initProductShowcaseModal() {
 
   /* --- Render Hotspots on Product --- */
   function renderHotspots(hotspots) {
+    if (!hotspotsLayer) return;
     hotspotsLayer.innerHTML = '';
     if (!hotspots) return;
 
@@ -1932,6 +1933,7 @@ function initProductShowcaseModal() {
 
   /* --- Render Material Swatches --- */
   function renderSwatches(finishes, product) {
+    if (!swatchesWrap) return;
     swatchesWrap.innerHTML = '';
     if (!finishes || !finishes.length) return;
 
@@ -2479,6 +2481,20 @@ function initProductShowcaseModal() {
         openProduct(id);
       }
     });
+  });
+
+  // Delegated handler ensuring "Inspect Piece" and card links always open the modal
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented) return;
+    const trigger = e.target.closest('[data-open-product], .product-card, .product-card-link');
+    if (!trigger) return;
+    const id = trigger.getAttribute('data-open-product') ||
+               trigger.getAttribute('data-product-id') ||
+               trigger.closest('.product-card')?.getAttribute('data-product-id');
+    if (id && PRODUCTS[id]) {
+      e.preventDefault();
+      openProduct(id);
+    }
   });
 
   /* --- Tear Sheet (.PDF) Download Mock --- */
