@@ -1304,46 +1304,202 @@ function initProductShowcaseModal() {
   const dimW           = document.getElementById('dim-label-w');
   const dimH           = document.getElementById('dim-label-h');
   const dimD           = document.getElementById('dim-label-d');
+  const dimLineW       = document.getElementById('dim-line-w');
+  const dimLineH       = document.getElementById('dim-line-h');
+  const dimMasterHud   = document.getElementById('dim-master-hud');
+  const dimToastEl     = document.getElementById('dim-toast');
+  const btnCopyDims    = document.getElementById('btn-copy-door-dims');
+  const unitToggleBtns = document.querySelectorAll('.dim-unit-btn');
 
-  function formatDimension(dimCm, prefix) {
-    if (dimCm == null) return '';
-    const mVal = (dimCm / 100).toFixed(2);
-    return `${prefix}: ${dimCm} cm (${mVal} m)`;
+  // Architectural Dimensions System & Unit Management (Metric / Imperial)
+  let currentDimUnit = 'metric'; // 'metric' or 'imperial'
+  let activeProductDims = null;
+  let dimToastTimer = null;
+
+  function showDimToast(msg) {
+    if (!dimToastEl) return;
+    dimToastEl.textContent = msg;
+    dimToastEl.classList.add('is-visible');
+    if (dimToastTimer) clearTimeout(dimToastTimer);
+    dimToastTimer = setTimeout(() => {
+      dimToastEl?.classList.remove('is-visible');
+    }, 2400);
+  }
+
+  function copyTextToClipboard(text, successMsg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showDimToast(successMsg);
+      }).catch(() => {
+        showDimToast(successMsg);
+      });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      document.body.removeChild(ta);
+      showDimToast(successMsg);
+    }
+  }
+
+  function toFractionalInches(inchesVal) {
+    const feet = Math.floor(inchesVal / 12);
+    const remInches = inchesVal % 12;
+    const wholeInches = Math.floor(remInches);
+    const fractionPart = remInches - wholeInches;
+    let fracStr = '';
+    if (fractionPart >= 0.875) {
+      return feet > 0 ? `${feet}' ${wholeInches + 1}"` : `${wholeInches + 1}"`;
+    } else if (fractionPart >= 0.625) {
+      fracStr = '¾';
+    } else if (fractionPart >= 0.375) {
+      fracStr = '½';
+    } else if (fractionPart >= 0.125) {
+      fracStr = '¼';
+    }
+    const inStr = fracStr ? `${wholeInches}${fracStr}"` : `${wholeInches}"`;
+    return feet > 0 ? `${feet}' ${inStr}` : inStr;
+  }
+
+  function formatDimensionValues(dimCm, unit = currentDimUnit) {
+    if (dimCm == null) return { primary: '', secondary: '' };
+    if (unit === 'imperial') {
+      const totalInches = dimCm / 2.54;
+      return {
+        primary: `${totalInches.toFixed(1)} in`,
+        secondary: `(${toFractionalInches(totalInches)})`
+      };
+    } else {
+      return {
+        primary: `${dimCm} cm`,
+        secondary: `(${(dimCm / 100).toFixed(2)} m)`
+      };
+    }
+  }
+
+  function updateDimensionLabels(p, unit = currentDimUnit) {
+    if (!p || !p.dimensions) return;
+    const wCm = typeof p.dimensions.wCm === 'number' ? p.dimensions.wCm : 120;
+    const hCm = typeof p.dimensions.hCm === 'number' ? p.dimensions.hCm : 250;
+    const isInternal = p.category === 'internal-door';
+
+    const wFormatted = formatDimensionValues(wCm, unit);
+    const hFormatted = formatDimensionValues(hCm, unit);
+
+    // Update primary and secondary values on width describer
+    const elWPrimary = document.getElementById('dim-w-primary');
+    const elWSecondary = document.getElementById('dim-w-secondary');
+    if (elWPrimary) {
+      if (unit === 'imperial') {
+        elWPrimary.innerHTML = `${(wCm / 2.54).toFixed(1)} <abbr class="dim-val-unit">IN</abbr>`;
+        if (elWSecondary) elWSecondary.textContent = wFormatted.secondary;
+      } else {
+        elWPrimary.innerHTML = `${wCm} <abbr class="dim-val-unit">CM</abbr>`;
+        if (elWSecondary) elWSecondary.textContent = wFormatted.secondary;
+      }
+    }
+
+    // Update primary and secondary values on height describer
+    const elHPrimary = document.getElementById('dim-h-primary');
+    const elHSecondary = document.getElementById('dim-h-secondary');
+    if (elHPrimary) {
+      if (unit === 'imperial') {
+        elHPrimary.innerHTML = `${(hCm / 2.54).toFixed(1)} <abbr class="dim-val-unit">IN</abbr>`;
+        if (elHSecondary) elHSecondary.textContent = hFormatted.secondary;
+      } else {
+        elHPrimary.innerHTML = `${hCm} <abbr class="dim-val-unit">CM</abbr>`;
+        if (elHSecondary) elHSecondary.textContent = hFormatted.secondary;
+      }
+    }
+
+    // Update Desktop Tooltip Specs
+    const specWLeaf = document.getElementById('spec-w-leaf');
+    const specWOpening = document.getElementById('spec-w-opening');
+    const specWClear = document.getElementById('spec-w-clear');
+    if (specWLeaf) {
+      if (unit === 'imperial') {
+        specWLeaf.textContent = `${(wCm / 2.54).toFixed(1)} in ${wFormatted.secondary}`;
+        specWOpening.textContent = `${((wCm + 8) / 2.54).toFixed(1)} in (+3.1 in)`;
+        specWClear.textContent = `${((wCm - 8) / 2.54).toFixed(1)} in net clear`;
+      } else {
+        specWLeaf.textContent = `${wCm} cm (${(wCm / 100).toFixed(2)} m)`;
+        specWOpening.textContent = `${wCm + 8} cm (+8 cm clearance)`;
+        specWClear.textContent = `${wCm - 8} cm net clear passage`;
+      }
+    }
+
+    const specHLeaf = document.getElementById('spec-h-leaf');
+    const specHOpening = document.getElementById('spec-h-opening');
+    if (specHLeaf) {
+      if (unit === 'imperial') {
+        specHLeaf.textContent = `${(hCm / 2.54).toFixed(1)} in ${hFormatted.secondary}`;
+        specHOpening.textContent = `${((hCm + 6) / 2.54).toFixed(1)} in (+2.4 in)`;
+      } else {
+        specHLeaf.textContent = `${hCm} cm (${(hCm / 100).toFixed(2)} m)`;
+        specHOpening.textContent = `${hCm + 6} cm (+6 cm clearance)`;
+      }
+    }
+
+    // Master HUD Title
+    const masterTitle = document.getElementById('dim-master-title');
+    if (masterTitle) {
+      const typeLabel = isInternal ? 'Internal Living' : 'Main Entrance';
+      if (unit === 'imperial') {
+        masterTitle.textContent = `${toFractionalInches(wCm / 2.54)} × ${toFractionalInches(hCm / 2.54)} · ${typeLabel}`;
+      } else {
+        masterTitle.textContent = `${wCm} × ${hCm} cm · ${typeLabel}`;
+      }
+    }
+
+    // Calibrate CSS variables on dimOverlay for millimeter-precise positioning per door type
+    if (dimOverlay) {
+      if (isInternal) {
+        dimOverlay.classList.add('is-internal-door');
+        dimOverlay.classList.remove('is-main-entrance');
+        dimOverlay.style.setProperty('--dim-w-left', '21%');
+        dimOverlay.style.setProperty('--dim-w-right', '21%');
+        dimOverlay.style.setProperty('--dim-w-bottom', '5.5%');
+        dimOverlay.style.setProperty('--dim-h-right', '14.5%');
+        dimOverlay.style.setProperty('--dim-h-top', '5.5%');
+        dimOverlay.style.setProperty('--dim-h-bottom', '5.5%');
+      } else {
+        dimOverlay.classList.add('is-main-entrance');
+        dimOverlay.classList.remove('is-internal-door');
+        // Handle grand double doors vs single pivot entrance
+        if (p.id === 'door-main-1' || p.id === 'door-main-8') {
+          dimOverlay.style.setProperty('--dim-w-left', '5.5%');
+          dimOverlay.style.setProperty('--dim-w-right', '5.5%');
+          dimOverlay.style.setProperty('--dim-h-right', '2.5%');
+        } else {
+          dimOverlay.style.setProperty('--dim-w-left', '8%');
+          dimOverlay.style.setProperty('--dim-w-right', '8%');
+          dimOverlay.style.setProperty('--dim-h-right', '3.5%');
+        }
+        dimOverlay.style.setProperty('--dim-w-bottom', '5.5%');
+        dimOverlay.style.setProperty('--dim-h-top', '6%');
+        dimOverlay.style.setProperty('--dim-h-bottom', '6%');
+      }
+    }
   }
 
   function applyProductDimensions(p) {
     if (!p || !p.dimensions) return;
+    activeProductDims = p;
     const dimLineDepth = document.querySelector('.dim-line--depth');
 
-    let widthStr = '';
-    let heightStr = '';
     let depthStr = '';
-
-    if (typeof p.dimensions.wCm === 'number') {
-      widthStr = formatDimension(p.dimensions.wCm, 'W');
-    } else {
-      widthStr = p.dimensions.width || '';
-    }
-
-    if (typeof p.dimensions.hCm === 'number') {
-      heightStr = formatDimension(p.dimensions.hCm, 'H');
-    } else {
-      heightStr = p.dimensions.height || '';
-    }
-
     if (typeof p.dimensions.dCm === 'number' && p.dimensions.dCm > 0) {
-      depthStr = formatDimension(p.dimensions.dCm, 'D');
+      depthStr = `D: ${p.dimensions.dCm} cm (${(p.dimensions.dCm / 100).toFixed(2)} m)`;
     } else if (p.dimensions.depth && p.dimensions.depth.trim() !== '') {
       depthStr = p.dimensions.depth;
     } else {
       depthStr = '';
     }
 
-    // Dimension labels
-    if (dimW) dimW.textContent = widthStr;
-    if (dimH) dimH.textContent = heightStr;
-
-    // Depth line: hidden for all products with no depth (all main entrance doors)
     if (depthStr) {
       if (dimD) dimD.textContent = depthStr;
       if (dimLineDepth) dimLineDepth.style.display = 'flex';
@@ -1352,7 +1508,60 @@ function initProductShowcaseModal() {
       if (dimLineDepth) dimLineDepth.style.display = 'none';
     }
 
+    updateDimensionLabels(p, currentDimUnit);
   }
+
+  // Interactive copy triggers for Height & Width Describers
+  dimW?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!activeProductDims) return;
+    const wCm = activeProductDims.dimensions?.wCm || 120;
+    const unit = currentDimUnit;
+    const formatted = formatDimensionValues(wCm, unit);
+    const specText = `Maison Forme Architectural Door Width: ${wCm} cm (${(wCm/100).toFixed(2)} m / ${(wCm/2.54).toFixed(1)} in) · Rough Opening: ${wCm + 8} cm · Clear Passage: ${wCm - 8} cm`;
+    copyTextToClipboard(specText, `✓ Copied Width (${formatted.primary}) Specs`);
+  });
+
+  dimH?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!activeProductDims) return;
+    const hCm = activeProductDims.dimensions?.hCm || 250;
+    const unit = currentDimUnit;
+    const formatted = formatDimensionValues(hCm, unit);
+    const specText = `Maison Forme Architectural Door Height: ${hCm} cm (${(hCm/100).toFixed(2)} m / ${(hCm/2.54).toFixed(1)} in) · Rough Opening: ${hCm + 6} cm · Floor Clearance: 10 mm`;
+    copyTextToClipboard(specText, `✓ Copied Height (${formatted.primary}) Specs`);
+  });
+
+  btnCopyDims?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!activeProductDims) return;
+    const wCm = activeProductDims.dimensions?.wCm || 120;
+    const hCm = activeProductDims.dimensions?.hCm || 250;
+    const name = activeProductDims.name || 'Architectural Door';
+    const specText = `${name} Architectural Dimensions:\n• Nominal Leaf: ${wCm} cm (W) × ${hCm} cm (H) [${(wCm/2.54).toFixed(1)}" × ${(hCm/2.54).toFixed(1)}"]\n• Rough Wall Opening: ${wCm + 8} cm × ${hCm + 6} cm\n• Clear Passage: ${wCm - 8} cm net walkthrough\n• Floor Clearance: 10 mm standard sill`;
+    copyTextToClipboard(specText, `✓ Copied Full ${name} Dimensions`);
+  });
+
+  // Unit Toggle (Metric / Imperial)
+  unitToggleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const unit = btn.getAttribute('data-unit');
+      if (unit === currentDimUnit) return;
+      currentDimUnit = unit;
+      unitToggleBtns.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      if (activeProductDims) {
+        updateDimensionLabels(activeProductDims, currentDimUnit);
+      }
+    });
+  });
+
+  // Line hover glow when hovering describer pills
+  dimW?.addEventListener('mouseenter', () => dimLineW?.classList.add('is-highlighted'));
+  dimW?.addEventListener('mouseleave', () => dimLineW?.classList.remove('is-highlighted'));
+  dimH?.addEventListener('mouseenter', () => dimLineH?.classList.add('is-highlighted'));
+  dimH?.addEventListener('mouseleave', () => dimLineH?.classList.remove('is-highlighted'));
 
   // View tabs & quick controls
   const tabPrimary       = document.getElementById('tab-view-primary');
@@ -1988,6 +2197,7 @@ function initProductShowcaseModal() {
   /* --- Architectural Dimensions Toggle --- */
   btnToggleDims?.addEventListener('click', () => {
     const isVis = dimOverlay.classList.toggle('is-visible');
+    dimMasterHud?.classList.toggle('is-visible', isVis);
     btnToggleDims.classList.toggle('active', isVis);
   });
 
@@ -2204,7 +2414,9 @@ function initProductShowcaseModal() {
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-locked');
     dimOverlay?.classList.remove('is-visible');
+    dimMasterHud?.classList.remove('is-visible');
     btnToggleDims?.classList.remove('active');
+    dimToastEl?.classList.remove('is-visible');
     craftBanner?.classList.remove('is-visible');
     if (primaryImg) primaryImg.style.transform = '';
     if (sheen) sheen.style.transform = '';

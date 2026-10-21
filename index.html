@@ -15,7 +15,7 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
 
-  <link rel="stylesheet" href="style.css?v=2.3" />
+  <link rel="stylesheet" href="style.css?v=2.4" />
 </head>
 
 <body>
@@ -1575,12 +1575,108 @@
 
               <!-- Architectural Dimensions Overlay (Anchored to product bounds) -->
               <div class="dimension-overlay" id="dimension-overlay" aria-hidden="true">
-                <div class="dim-line dim-line--width">
-                  <span class="dim-label" id="dim-label-w">W: 120 cm (1.20 m)</span>
+                <!-- Width Dimension Caliper & Interactive Describer -->
+                <div class="dim-line dim-line--width" id="dim-line-w">
+                  <span class="dim-guide dim-guide--w-left" aria-hidden="true"></span>
+                  <span class="dim-guide dim-guide--w-right" aria-hidden="true"></span>
+                  <button class="dim-label dim-label--interactive" id="dim-label-w" type="button" aria-label="Door Width. Click to copy architectural specs.">
+                    <span class="dim-axis-badge">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4"/>
+                      </svg>
+                      <span>WIDTH</span>
+                    </span>
+                    <span class="dim-val-primary" id="dim-w-primary">120 <abbr class="dim-val-unit">cm</abbr></span>
+                    <span class="dim-val-secondary" id="dim-w-secondary">(1.20 m)</span>
+                    <span class="dim-copy-icon" title="Copy width specs" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                    </span>
+
+                    <!-- Desktop Architectural Specs Flyout -->
+                    <div class="dim-tooltip dim-tooltip--width" id="dim-tooltip-w" role="tooltip">
+                      <div class="dim-tooltip-header">
+                        <span class="dim-tooltip-badge">Architectural Spec</span>
+                        <span class="dim-tooltip-sub">Width Clearance</span>
+                      </div>
+                      <div class="dim-tooltip-rows">
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Nominal Leaf:</span>
+                          <span class="dim-row-val" id="spec-w-leaf">120 cm (1.20 m)</span>
+                        </div>
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Rough Wall Opening:</span>
+                          <span class="dim-row-val" id="spec-w-opening">128 cm (+8 cm)</span>
+                        </div>
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Clear Passage:</span>
+                          <span class="dim-row-val" id="spec-w-clear">112 cm net walkthrough</span>
+                        </div>
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Frame Casing:</span>
+                          <span class="dim-row-val">100–150 mm adjustable</span>
+                        </div>
+                      </div>
+                      <div class="dim-tooltip-footer">
+                        <span class="dim-tooltip-action">Click to copy width specs</span>
+                      </div>
+                    </div>
+                  </button>
                 </div>
-                <div class="dim-line dim-line--height">
-                  <span class="dim-label" id="dim-label-h">H: 250 cm (2.50 m)</span>
+
+                <!-- Height Dimension Caliper & Interactive Describer -->
+                <div class="dim-line dim-line--height" id="dim-line-h">
+                  <span class="dim-guide dim-guide--h-top" aria-hidden="true"></span>
+                  <span class="dim-guide dim-guide--h-bottom" aria-hidden="true"></span>
+                  <button class="dim-label dim-label--interactive" id="dim-label-h" type="button" aria-label="Door Height. Click to copy architectural specs.">
+                    <span class="dim-axis-badge">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 4v16M12 4l-4 4M12 4l4 4M12 20l-4-4M12 20l4-4"/>
+                      </svg>
+                      <span>HEIGHT</span>
+                    </span>
+                    <span class="dim-val-primary" id="dim-h-primary">250 <abbr class="dim-val-unit">cm</abbr></span>
+                    <span class="dim-val-secondary" id="dim-h-secondary">(2.50 m)</span>
+                    <span class="dim-copy-icon" title="Copy height specs" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                    </span>
+
+                    <!-- Desktop Architectural Specs Flyout -->
+                    <div class="dim-tooltip dim-tooltip--height" id="dim-tooltip-h" role="tooltip">
+                      <div class="dim-tooltip-header">
+                        <span class="dim-tooltip-badge">Architectural Spec</span>
+                        <span class="dim-tooltip-sub">Height Clearance</span>
+                      </div>
+                      <div class="dim-tooltip-rows">
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Nominal Leaf:</span>
+                          <span class="dim-row-val" id="spec-h-leaf">250 cm (2.50 m)</span>
+                        </div>
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Rough Wall Opening:</span>
+                          <span class="dim-row-val" id="spec-h-opening">256 cm (+6 cm)</span>
+                        </div>
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Floor Clearance:</span>
+                          <span class="dim-row-val">10 mm standard sill</span>
+                        </div>
+                        <div class="dim-tooltip-row">
+                          <span class="dim-row-lbl">Header Trim:</span>
+                          <span class="dim-row-val">70 mm matching architrave</span>
+                        </div>
+                      </div>
+                      <div class="dim-tooltip-footer">
+                        <span class="dim-tooltip-action">Click to copy height specs</span>
+                      </div>
+                    </div>
+                  </button>
                 </div>
+
                 <div class="dim-line dim-line--depth">
                   <span class="dim-label" id="dim-label-d"></span>
                 </div>
@@ -1607,6 +1703,35 @@
               <p class="craft-banner-desc" id="craft-banner-desc">Sustainable sound insulation using recycled materials for peaceful spaces.</p>
             </div>
 
+            <!-- Floating Master Dimension Control Dock (Bottom Left, Desktop Architectural HUD) -->
+            <div class="dim-master-hud" id="dim-master-hud" aria-label="Architectural Dimension Master Controller">
+              <div class="dim-master-info">
+                <span class="dim-master-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="9" y1="3" x2="9" y2="21"/>
+                    <line x1="15" y1="3" x2="15" y2="21"/>
+                  </svg>
+                </span>
+                <span class="dim-master-title" id="dim-master-title">120 × 250 cm · Main Entrance</span>
+              </div>
+              <div class="dim-master-actions">
+                <div class="dim-unit-toggle" id="dim-unit-toggle" role="group" aria-label="Dimension Unit Switcher">
+                  <button type="button" class="dim-unit-btn is-active" data-unit="metric" title="Metric: cm &amp; m">CM</button>
+                  <button type="button" class="dim-unit-btn" data-unit="imperial" title="Imperial: feet &amp; inches">FT</button>
+                </div>
+                <button type="button" class="dim-master-copy-btn" id="btn-copy-door-dims" title="Copy full architectural dimensions to clipboard">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span>Copy Specs</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Architectural Dimension Toast Notification -->
+            <div class="dim-toast" id="dim-toast" role="status" aria-live="polite"></div>
 
             <!-- Floating Glass Zoom & Pan Micro-Dock (Bottom Right, Zero layout obstruction) -->
             <aside class="floating-stage-dock" id="floating-stage-dock" aria-label="Zoom and detail controls">
@@ -1899,7 +2024,7 @@
   <!-- Cursor spotlight (decorative) -->
   <div class="cursor-spotlight" id="cursor-spotlight" aria-hidden="true"></div>
 
-  <script src="main.js"></script>
+  <script src="main.js?v=2.4"></script>
 </body>
 
 </html>
