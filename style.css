@@ -2678,53 +2678,43 @@ body.is-fullscreen #stage-craft-banner {
 }
 .visualizer-stage:hover .product-sheen { opacity: 0.75; }
 
-/* Architectural Dimension Overlay & Calibrated Caliper System */
+/* Architectural Dimension Overlay & Exterior Drafting System */
 .dimension-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 5;
   opacity: 0;
-  transform: scale(0.99);
-  transition: opacity 0.4s var(--ease-luxury), transform 0.4s var(--ease-luxury);
-  /* Default calibrated positioning variables (dynamically updated per door type) */
-  --dim-w-left: 8%;
-  --dim-w-right: 8%;
-  --dim-w-bottom: 5.5%;
-  --dim-h-right: 3.5%;
-  --dim-h-top: 6%;
-  --dim-h-bottom: 6%;
+  transform: scale(1);
+  transition: opacity 0.35s var(--ease-luxury);
+  /* Default positioning bounds: width line spans outside below, height line spans outside to right */
+  --dim-w-left: 5%;
+  --dim-w-right: 5%;
+  --dim-h-top: 3%;
+  --dim-h-bottom: 3%;
 }
 .dimension-overlay.is-visible {
   opacity: 1;
-  transform: scale(1);
 }
 
 /* Internal doors have a narrower leaf (~85 cm), perfectly calibrated */
 .dimension-overlay.is-internal-door {
   --dim-w-left: 21%;
   --dim-w-right: 21%;
-  --dim-w-bottom: 5.5%;
-  --dim-h-right: 14.5%;
-  --dim-h-top: 5.5%;
-  --dim-h-bottom: 5.5%;
+  --dim-h-top: 4%;
+  --dim-h-bottom: 4%;
 }
 
 /* Main entrance doors have a grand portal width (~120 cm) */
 .dimension-overlay.is-main-entrance {
-  --dim-w-left: 8%;
-  --dim-w-right: 8%;
-  --dim-w-bottom: 5.5%;
-  --dim-h-right: 3.5%;
-  --dim-h-top: 6%;
-  --dim-h-bottom: 6%;
+  --dim-w-left: 5%;
+  --dim-w-right: 5%;
+  --dim-h-top: 3%;
+  --dim-h-bottom: 3%;
 }
 
 .dim-line {
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   pointer-events: none;
   transition:
     border-color 0.3s ease,
@@ -2735,16 +2725,19 @@ body.is-fullscreen #stage-craft-banner {
     bottom 0.35s var(--ease-luxury);
 }
 
-/* Width Caliper Line & End Ticks */
+/* Width Caliper Line — Sits COMPLETELY OUTSIDE below the door image */
 .dim-line--width {
-  bottom: var(--dim-w-bottom, 5.5%);
-  left: var(--dim-w-left, 8%);
-  right: var(--dim-w-right, 8%);
+  top: calc(100% + 26px);
+  left: var(--dim-w-left, 5%);
+  right: var(--dim-w-right, 5%);
   height: 0;
   border-top: 1.5px dashed var(--color-gold);
   border-bottom: none;
   border-left: none;
   border-right: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 .dim-line--width::before,
 .dim-line--width::after {
@@ -2760,16 +2753,50 @@ body.is-fullscreen #stage-craft-banner {
 .dim-line--width::before { left: 0; }
 .dim-line--width::after { right: 0; }
 
-/* Height Caliper Line & End Ticks */
+/* Width Witness/Extension Lines: project from door bottom corners down to width line */
+.dim-guide--w-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 26px;
+  border-left: 1px dotted var(--color-gold);
+  transform: translateY(-100%);
+  opacity: 0.6;
+}
+.dim-guide--w-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 26px;
+  border-left: 1px dotted var(--color-gold);
+  transform: translateY(-100%);
+  opacity: 0.6;
+}
+
+/* Width Describer Badge: sits below the width line, completely clear of the door */
+.dim-label--width {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+/* Height Caliper Line — Sits COMPLETELY OUTSIDE to the right of the door image */
 .dim-line--height {
-  top: var(--dim-h-top, 6%);
-  bottom: var(--dim-h-bottom, 6%);
-  right: var(--dim-h-right, 3.5%);
+  top: var(--dim-h-top, 3%);
+  bottom: var(--dim-h-bottom, 3%);
+  left: calc(100% + 28px);
   width: 0;
   border-left: 1.5px dashed var(--color-gold);
   border-top: none;
   border-bottom: none;
   border-right: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 .dim-line--height::before,
 .dim-line--height::after {
@@ -2785,56 +2812,38 @@ body.is-fullscreen #stage-craft-banner {
 .dim-line--height::before { top: 0; }
 .dim-line--height::after { bottom: 0; }
 
-/* Architectural Drafting Witness/Guide Lines */
-.dim-guide {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0.55;
-  transition: opacity 0.3s ease;
-}
-.dim-guide--w-left {
-  bottom: 0;
-  left: 0;
-  width: 1px;
-  height: 18px;
-  border-left: 1px dotted var(--color-gold);
-}
-.dim-guide--w-right {
-  bottom: 0;
-  right: 0;
-  width: 1px;
-  height: 18px;
-  border-left: 1px dotted var(--color-gold);
-}
+/* Height Witness/Extension Lines: project from door top/bottom right corners out to height line */
 .dim-guide--h-top {
+  position: absolute;
   top: 0;
   right: 0;
+  width: 28px;
   height: 1px;
-  width: 20px;
   border-top: 1px dotted var(--color-gold);
+  transform: translateX(-100%);
+  opacity: 0.6;
 }
 .dim-guide--h-bottom {
+  position: absolute;
   bottom: 0;
   right: 0;
+  width: 28px;
   height: 1px;
-  width: 20px;
   border-top: 1px dotted var(--color-gold);
+  transform: translateX(-100%);
+  opacity: 0.6;
 }
 
-/* Hover glow across line and witness guides */
-.dim-line.is-highlighted,
-.dim-line:hover,
-.dim-line:focus-within {
-  border-color: #E2C092;
-  filter: drop-shadow(0 0 6px rgba(197, 168, 128, 0.65));
-}
-.dim-line.is-highlighted .dim-guide,
-.dim-line:hover .dim-guide,
-.dim-line:focus-within .dim-guide {
-  opacity: 0.95;
+/* Height Describer Badge: sits to the right of the height line, completely clear of the door */
+.dim-label--height {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
 }
 
-/* Depth line for bespoke units */
+/* Depth Line (bespoke) */
 .dim-line--depth {
   top: 14%; left: 8%; width: 100px;
   transform: rotate(-35deg);
@@ -2842,13 +2851,12 @@ body.is-fullscreen #stage-craft-banner {
   border-bottom: none; border-left: none; border-right: none;
 }
 
-/* Luxury Interactive Dimension Describer Badges */
+/* Luxury Dimension Describer Badges */
 .dim-label {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.32rem 0.68rem;
+  padding: 0.32rem 0.65rem;
   font-family: var(--font-sans);
   color: var(--color-ivory);
   background: rgba(22, 19, 16, 0.94);
@@ -2858,25 +2866,32 @@ body.is-fullscreen #stage-craft-banner {
   border: 1px solid rgba(197, 168, 128, 0.45);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   white-space: nowrap;
-  cursor: pointer;
   pointer-events: auto;
   user-select: none;
-  transition: all 0.25s var(--ease-spring);
-  text-decoration: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s var(--ease-spring);
   line-height: 1.2;
 }
 
-/* Desktop Hover & Focus states */
-.dim-label:hover,
-.dim-label:focus-visible {
+.dim-label:hover {
   border-color: var(--color-gold);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 18px rgba(197, 168, 128, 0.4);
-  transform: scale(1.06);
-  background: rgba(28, 24, 20, 0.98);
-  outline: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 14px rgba(197, 168, 128, 0.35);
 }
-.dim-label:active {
-  transform: scale(0.98);
+.dim-label--height:hover {
+  transform: translateY(-50%) scale(1.04);
+}
+.dim-label--width:hover {
+  transform: translateX(-50%) scale(1.04);
+}
+
+/* Line hover glow */
+.dim-line.is-highlighted,
+.dim-line:hover {
+  border-color: #E2C092;
+  filter: drop-shadow(0 0 6px rgba(197, 168, 128, 0.65));
+}
+.dim-line.is-highlighted .dim-guide,
+.dim-line:hover .dim-guide {
+  opacity: 0.95;
 }
 
 /* Micro Axis Badge (HEIGHT / WIDTH) */
@@ -2914,251 +2929,12 @@ body.is-fullscreen #stage-craft-banner {
   text-transform: uppercase;
 }
 
-/* Secondary Readout (e.g. 2.50 m or Imperial) */
+/* Secondary Readout (e.g. 2.50 m) */
 .dim-val-secondary {
   font-size: 0.66rem;
   color: rgba(244, 242, 238, 0.65);
   font-weight: 500;
   font-family: var(--font-sans);
-}
-
-/* Copy Icon Cue */
-.dim-copy-icon {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-gold);
-  opacity: 0.45;
-  transition: opacity 0.2s, transform 0.2s;
-  margin-left: 0.1rem;
-}
-.dim-label:hover .dim-copy-icon {
-  opacity: 1;
-  transform: scale(1.15);
-}
-
-/* Desktop Rich Architectural Tooltip Flyout */
-.dim-tooltip {
-  position: absolute;
-  z-index: 100;
-  min-width: 220px;
-  padding: 0.75rem 0.9rem;
-  background: rgba(18, 15, 13, 0.97);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(197, 168, 128, 0.45);
-  border-radius: 6px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.22s var(--ease-luxury),
-    transform 0.22s var(--ease-luxury),
-    visibility 0.22s;
-  text-align: left;
-  cursor: default;
-}
-.dim-tooltip--width {
-  bottom: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%) translateY(6px);
-}
-.dim-tooltip--height {
-  right: calc(100% + 14px);
-  top: 50%;
-  transform: translateY(-50%) translateX(6px);
-}
-
-.dim-label:hover .dim-tooltip,
-.dim-label:focus-visible .dim-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
-.dim-label:hover .dim-tooltip--width,
-.dim-label:focus-visible .dim-tooltip--width {
-  transform: translateX(-50%) translateY(0);
-}
-.dim-label:hover .dim-tooltip--height,
-.dim-label:focus-visible .dim-tooltip--height {
-  transform: translateY(-50%) translateX(0);
-}
-
-.dim-tooltip-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(197, 168, 128, 0.2);
-}
-.dim-tooltip-badge {
-  font-size: 0.52rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-gold);
-}
-.dim-tooltip-sub {
-  font-size: 0.52rem;
-  color: rgba(244, 242, 238, 0.5);
-}
-.dim-tooltip-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 0.28rem;
-}
-.dim-tooltip-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  font-size: 0.64rem;
-}
-.dim-row-lbl {
-  color: rgba(244, 242, 238, 0.65);
-  font-weight: 400;
-}
-.dim-row-val {
-  color: #FFFFFF;
-  font-weight: 600;
-  font-family: var(--font-sans);
-}
-.dim-tooltip-footer {
-  margin-top: 0.45rem;
-  padding-top: 0.35rem;
-  border-top: 1px dashed rgba(197, 168, 128, 0.2);
-}
-.dim-tooltip-action {
-  font-size: 0.52rem;
-  color: var(--color-gold);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-/* Master Architectural Dimension Control Dock (Bottom Left on Stage) */
-.dim-master-hud {
-  position: absolute;
-  bottom: 1.25rem;
-  left: 1.25rem;
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0.85rem;
-  background: rgba(20, 18, 16, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(197, 168, 128, 0.35);
-  border-radius: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(10px);
-  transition: all 0.35s var(--ease-luxury);
-}
-.dim-master-hud.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-.dim-master-info {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-.dim-master-icon {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-gold);
-}
-.dim-master-title {
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--color-ivory);
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-}
-.dim-master-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-.dim-unit-toggle {
-  display: inline-flex;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 2px;
-  border-radius: 20px;
-  border: 1px solid rgba(197, 168, 128, 0.2);
-}
-.dim-unit-btn {
-  border: none;
-  background: transparent;
-  color: rgba(244, 242, 238, 0.6);
-  font-family: var(--font-sans);
-  font-size: 0.6rem;
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.dim-unit-btn:hover {
-  color: #FFFFFF;
-}
-.dim-unit-btn.is-active {
-  background: var(--color-gold);
-  color: var(--color-dark);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-.dim-master-copy-btn {
-  border: 1px solid rgba(197, 168, 128, 0.3);
-  background: rgba(197, 168, 128, 0.1);
-  color: var(--color-ivory);
-  font-family: var(--font-sans);
-  font-size: 0.6rem;
-  font-weight: 600;
-  padding: 0.25rem 0.65rem;
-  border-radius: 20px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.32rem;
-  transition: all 0.2s ease;
-}
-.dim-master-copy-btn:hover {
-  background: rgba(197, 168, 128, 0.25);
-  border-color: var(--color-gold);
-  color: #FFFFFF;
-}
-
-/* Dimension Toast Feedback Notification */
-.dim-toast {
-  position: absolute;
-  top: 1.25rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(-12px);
-  background: rgba(24, 21, 18, 0.96);
-  border: 1px solid var(--color-gold);
-  border-radius: 30px;
-  padding: 0.45rem 1.15rem;
-  color: #FFFFFF;
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 0 15px rgba(197, 168, 128, 0.25);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 100;
-  transition: all 0.3s var(--ease-spring);
-}
-.dim-toast.is-visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
 }
 
 /* Interactive Hotspots Layer */
@@ -5025,6 +4801,26 @@ body.is-fullscreen #stage-craft-banner {
   }
 
   /* Dimension lines on mobile — compact, non-intrusive */
+  .dim-line--height {
+    left: auto !important;
+    right: 8px !important;
+    justify-content: flex-end !important;
+  }
+  .dim-label--height {
+    left: auto !important;
+    right: 6px !important;
+  }
+  .dim-line--width {
+    top: auto !important;
+    bottom: 8px !important;
+  }
+  .dim-label--width {
+    top: auto !important;
+    bottom: 4px !important;
+  }
+  .dim-guide {
+    display: none !important;
+  }
   .dim-label {
     font-size: 0.58rem;
     padding: 0.2rem 0.42rem;
@@ -5040,10 +4836,6 @@ body.is-fullscreen #stage-craft-banner {
   }
   .dim-val-secondary {
     font-size: 0.55rem;
-  }
-  .dim-copy-icon,
-  .dim-tooltip {
-    display: none !important;
   }
 
   /* Floating Docks, Master Dimension HUD & Zoom HUD completely hidden on Mobile View */
